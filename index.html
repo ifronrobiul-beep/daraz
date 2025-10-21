@@ -198,6 +198,15 @@
                     </div>
                 </div>
                 <button type="submit" class="w-full mt-6 bg-orange-500 text-white py-3 rounded-lg font-semibold hover:bg-orange-600">Login</button>
+                 <div class="my-4 flex items-center">
+                    <div class="flex-grow border-t border-gray-300"></div>
+                    <span class="flex-shrink mx-4 text-gray-500 text-sm">OR</span>
+                    <div class="flex-grow border-t border-gray-300"></div>
+                </div>
+                <button type="button" onclick="handleGoogleSignIn()" class="w-full bg-white border border-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-50 flex items-center justify-center">
+                    <svg class="w-5 h-5 mr-2" viewBox="0 0 48 48"><path fill="#4285F4" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l8.35 6.48C12.73 13.72 17.95 9.5 24 9.5z"></path><path fill="#34A853" d="M46.98 24.55c0-1.57-.15-3.09-.42-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6.02C43.51 37.63 46.98 31.76 46.98 24.55z"></path><path fill="#FBBC05" d="M10.91 28.74c-.52-1.57-.82-3.24-.82-4.94s.3-3.37.82-4.94l-8.35-6.48C.73 16.31 0 20.05 0 24c0 3.95.73 7.69 2.56 11.22l8.35-6.48z"></path><path fill="#EA4335" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6.02c-2.11 1.44-4.78 2.28-7.96 2.28-6.04 0-11.26-4.22-13.09-9.98l-8.35 6.48C6.51 42.62 14.62 48 24 48z"></path><path fill="none" d="M0 0h48v48H0z"></path></svg>
+                    Sign in with Google
+                </button>
                  <p class="text-sm text-center mt-4 text-gray-600">
                     Don't have an account? <a href="#" onclick="showModal('signup-modal'); hideModal('login-modal');" class="font-medium text-orange-600 hover:text-orange-500">Sign up</a>
                 </p>
@@ -280,8 +289,28 @@
         </div>
     </div>
 
+    <script type="module">
+        // --- FIREBASE IMPORTS ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, onSnapshot, collection, query, where, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    <script>
+        // --- FIREBASE CONFIG & INITIALIZATION ---
+        // IMPORTANT: Replace with your actual Firebase config
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const googleProvider = new GoogleAuthProvider();
+
         // --- STATE MANAGEMENT ---
         const state = {
             products: [],
@@ -293,36 +322,14 @@
             searchQuery: '',
             currentCategory: null,
             isLoggedIn: false,
-            currentUser: null,
+            currentUser: null, // Will store Firebase user object
             isAdmin: false,
-            adminCurrentTab: 'orders',
-            profileCurrentTab: 'profile'
+            adminCurrentTab: 'dashboard',
+            profileCurrentTab: 'profile',
+            dashboardStats: { income: 0, pending: 0, completed: 0, canceled: 0 },
+            unsubscribeProducts: null,
+            unsubscribeOrders: null,
         };
-
-        // --- MOCK DATA ---
-        const mockProducts = [
-            { id: 1, name: 'Premium Wireless Earbuds', price: 2499, oldPrice: 3500, rating: 4.8, sold: 120, image: 'https://placehold.co/400x400/F97316/FFFFFF?text=Earbuds', category: 'Electronics', reviews: [{user: 'Mehedi H.', rating: 5, text: 'Amazing sound quality and battery life!', date: '2025-10-20'}, {user: 'Saima A.', rating: 4, text: 'Good product, connects easily.', date: '2025-10-18'}], questions: [{user: 'Fahim', question: 'Is this compatible with iPhone?', answer: 'Yes, it works perfectly with all Bluetooth-enabled devices, including iPhones.', date: '2025-10-19'}] },
-            { id: 2, name: 'Smart Watch with Fitness Tracker', price: 3999, oldPrice: 5000, rating: 4.5, sold: 88, image: 'https://placehold.co/400x400/3B82F6/FFFFFF?text=Watch', category: 'Electronics', reviews: [], questions: [] },
-            { id: 5, name: 'Gaming Mouse with RGB', price: 1500, oldPrice: 2200, rating: 4.7, sold: 150, image: 'https://placehold.co/400x400/EF4444/FFFFFF?text=Mouse', category: 'Electronics', reviews: [{user: 'GamerGuy', rating: 5, text: 'Best mouse for the price!', date: '2025-09-15'}], questions: [{user: 'Newbie', question: 'Can I change the RGB colors?', answer: 'Yes, it comes with software to customize the lighting effects.', date: '2025-09-12'}] },
-            { id: 9, name: '4K Action Camera', price: 8500, oldPrice: 11000, rating: 4.6, sold: 45, image: 'https://placehold.co/400x400/22C55E/FFFFFF?text=Camera', category: 'Electronics', reviews: [], questions: [] },
-            { id: 10, name: 'Portable Bluetooth Speaker', price: 2200, oldPrice: 3000, rating: 4.9, sold: 200, image: 'https://placehold.co/400x400/8B5CF6/FFFFFF?text=Speaker', category: 'Electronics', reviews: [], questions: [] },
-            { id: 3, name: 'Men\'s Casual Cotton Shirt', price: 850, oldPrice: 1200, rating: 4.2, sold: 250, image: 'https://placehold.co/400x400/10B981/FFFFFF?text=Shirt', category: 'Fashion', reviews: [{user: 'Rina', rating: 5, text: 'Fabric is very comfortable.', date: '2025-10-05'}], questions: [{user: 'Kamal', question: 'What is the return policy?', answer: 'We have a 7-day return policy for this item.', date: '2025-10-06'}] },
-            { id: 6, name: 'Women\'s Stylish Handbag', price: 1800, oldPrice: 2500, rating: 4.6, sold: 95, image: 'https://placehold.co/400x400/EC4899/FFFFFF?text=Handbag', category: 'Fashion', reviews: [], questions: [] },
-            { id: 8, name: 'Leather Wallet for Men', price: 600, oldPrice: 900, rating: 4.4, sold: 400, image: 'https://placehold.co/400x400/F59E0B/FFFFFF?text=Wallet', category: 'Fashion', reviews: [], questions: [] },
-            { id: 11, name: 'Classic Aviator Sunglasses', price: 1200, oldPrice: 1800, rating: 4.7, sold: 180, image: 'https://placehold.co/400x400/06B6D4/FFFFFF?text=Sunglasses', category: 'Fashion', reviews: [], questions: [] },
-            { id: 12, name: 'Running Shoes for Men', price: 3200, oldPrice: 4500, rating: 4.5, sold: 130, image: 'https://placehold.co/400x400/6366F1/FFFFFF?text=Shoes', category: 'Fashion', reviews: [], questions: [] },
-            { id: 4, name: 'Non-Stick Cookware Set (12 pcs)', price: 4500, oldPrice: 6000, rating: 4.9, sold: 50, image: 'https://placehold.co/400x400/6366F1/FFFFFF?text=Cookware', category: 'Home & Kitchen', reviews: [], questions: [] },
-            { id: 7, name: 'Professional Blender 1500W', price: 5500, oldPrice: 7000, rating: 4.8, sold: 70, image: 'https://placehold.co/400x400/8B5CF6/FFFFFF?text=Blender', category: 'Home & Kitchen', reviews: [], questions: [] },
-            { id: 13, name: 'Espresso Coffee Machine', price: 12500, oldPrice: 16000, rating: 4.9, sold: 30, image: 'https://placehold.co/400x400/374151/FFFFFF?text=Coffee', category: 'Home & Kitchen', reviews: [], questions: [] },
-            { id: 14, name: 'Robotic Vacuum Cleaner', price: 18000, oldPrice: 25000, rating: 4.7, sold: 25, image: 'https://placehold.co/400x400/F472B6/FFFFFF?text=Vacuum', category: 'Home & Kitchen', reviews: [], questions: [] },
-            { id: 15, name: 'Electric Toothbrush', price: 1800, oldPrice: 2500, rating: 4.8, sold: 90, image: 'https://placehold.co/400x400/34D399/FFFFFF?text=Toothbrush', category: 'Health & Beauty', reviews: [], questions: [] },
-            { id: 16, name: 'Vitamin C Serum', price: 950, oldPrice: 1300, rating: 4.6, sold: 300, image: 'https://placehold.co/400x400/FBBF24/FFFFFF?text=Serum', category: 'Health & Beauty', reviews: [], questions: [] },
-        ];
-        const mockOrders = [
-            { id: 101, customerName: 'johndoe', total: 3349, status: 'Pending', date: '2025-10-21', items: [{name: 'Premium Wireless Earbuds', quantity: 1, price: 2499}, {name: 'Men\'s Casual Cotton Shirt', quantity: 1, price: 850}] },
-            { id: 102, customerName: 'janesmith', total: 1800, status: 'Pending', date: '2025-10-20', items: [{name: 'Women\'s Stylish Handbag', quantity: 1, price: 1800}] },
-            { id: 103, customerName: 'admin', total: 10700, status: 'Shipped', date: '2025-10-19', items: [{name: '4K Action Camera', quantity: 1, price: 8500}, {name: 'Portable Bluetooth Speaker', quantity: 1, price: 2200}] },
-        ];
 
         // --- DOM ELEMENTS ---
         const mainContent = document.getElementById('main-content');
@@ -335,31 +342,31 @@
         function updateHeaderUI() {
             let actionsHTML = '';
             if(state.isLoggedIn) {
-                 actionsHTML += `<a href="#" onclick="handleNavigation('profile')" class="hidden md:flex items-center space-x-2 text-gray-700 hover:text-orange-500">
+                 actionsHTML += `<a href="#" onclick="window.handleNavigation('profile')" class="hidden md:flex items-center space-x-2 text-gray-700 hover:text-orange-500">
                         <i data-lucide="user-circle" class="w-6 h-6"></i>
                         <span class="text-sm">My Account</span>
                     </a>`;
                  if (state.isAdmin) {
-                     actionsHTML += `<a href="#" onclick="handleNavigation('admin')" class="hidden md:flex items-center space-x-2 text-orange-600 hover:text-orange-800 font-semibold">
+                     actionsHTML += `<a href="#" onclick="window.handleNavigation('admin')" class="hidden md:flex items-center space-x-2 text-orange-600 hover:text-orange-800 font-semibold">
                         <i data-lucide="shield" class="w-6 h-6"></i>
                         <span class="text-sm">Admin Panel</span>
                     </a>`;
                  }
-                 actionsHTML += `<button onclick="handleLogout()" class="hidden md:flex items-center space-x-2 text-gray-700 hover:text-orange-500">
+                 actionsHTML += `<button onclick="window.handleLogout()" class="hidden md:flex items-center space-x-2 text-gray-700 hover:text-orange-500">
                         <i data-lucide="log-out" class="w-6 h-6"></i>
                         <span class="text-sm">Logout</span>
                     </button>`;
             } else {
                  actionsHTML = `
-                    <a href="#" onclick="showModal('login-modal')" class="hidden md:flex items-center space-x-2 text-gray-700 hover:text-orange-500">
+                    <a href="#" onclick="window.showModal('login-modal')" class="hidden md:flex items-center space-x-2 text-gray-700 hover:text-orange-500">
                         <i data-lucide="user" class="w-6 h-6"></i><span class="text-sm">Login</span>
                     </a>
                     <span class="text-gray-300 hidden md:block">|</span>
-                    <a href="#" onclick="showModal('signup-modal')" class="hidden md:flex items-center space-x-2 text-gray-700 hover:text-orange-500">
+                    <a href="#" onclick="window.showModal('signup-modal')" class="hidden md:flex items-center space-x-2 text-gray-700 hover:text-orange-500">
                         <span class="text-sm">Sign Up</span>
                     </a>`;
             }
-            actionsHTML += `<div onclick="handleNavigation('cart')" class="relative text-gray-700 hover:text-orange-500 cursor-pointer">
+            actionsHTML += `<div onclick="window.handleNavigation('cart')" class="relative text-gray-700 hover:text-orange-500 cursor-pointer">
                 <i data-lucide="shopping-cart" class="w-7 h-7"></i>
                 <span id="cart-count" class="absolute -top-2 -right-2 bg-orange-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">${state.cart.reduce((sum, item) => sum + item.quantity, 0)}</span>
             </div>`;
@@ -370,37 +377,41 @@
         function renderLoader() { return `<div class="flex justify-center items-center p-20"><div class="loader"></div></div>`; }
         function renderProductGrid(products, title) {
             if (products.length === 0) { return `<section class="mb-8 text-center"><h2 class="text-2xl font-bold text-gray-800 mb-4">${title}</h2><p class="text-gray-500">No products found.</p></section>`; }
-            let productsHTML = products.map(product => `<div class="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-xl transition-shadow duration-300 group" onclick="handleNavigation('product', ${product.id})"><div class="relative"><img src="${product.image}" alt="${product.name}" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/400x400/ccc/000?text=Image+Error';"><div class="absolute top-2 left-2 bg-orange-500 text-white text-xs px-2 py-1 rounded">${Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)}% OFF</div></div><div class="p-4"><h3 class="text-sm font-medium text-gray-800 truncate group-hover:text-orange-600">${product.name}</h3><div class="mt-2"><span class="text-lg font-bold text-orange-500">৳${product.price}</span><span class="text-xs text-gray-500 line-through ml-2">৳${product.oldPrice}</span></div><div class="flex items-center mt-2 text-xs text-gray-500"><div class="flex text-yellow-400">${'<i data-lucide="star" class="w-3 h-3 fill-current"></i>'.repeat(Math.floor(product.rating))}${(product.rating % 1 !== 0 ? '<i data-lucide="star-half" class="w-3 h-3 fill-current"></i>' : '')}</div><span class="ml-1">(${product.sold})</span></div></div></div>`).join('');
+            let productsHTML = products.map(product => `<div class="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-xl transition-shadow duration-300 group" onclick="window.handleNavigation('product', '${product.id}')"><div class="relative"><img src="${product.image}" alt="${product.name}" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/400x400/ccc/000?text=Image+Error';"><div class="absolute top-2 left-2 bg-orange-500 text-white text-xs px-2 py-1 rounded">${Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)}% OFF</div></div><div class="p-4"><h3 class="text-sm font-medium text-gray-800 truncate group-hover:text-orange-600">${product.name}</h3><div class="mt-2"><span class="text-lg font-bold text-orange-500">৳${product.price}</span><span class="text-xs text-gray-500 line-through ml-2">৳${product.oldPrice}</span></div><div class="flex items-center mt-2 text-xs text-gray-500"><div class="flex text-yellow-400">${'<i data-lucide="star" class="w-3 h-3 fill-current"></i>'.repeat(Math.floor(product.rating))}${(product.rating % 1 !== 0 ? '<i data-lucide="star-half" class="w-3 h-3 fill-current"></i>' : '')}</div><span class="ml-1">(${product.sold})</span></div></div></div>`).join('');
             return `<section class="mb-8"><h2 class="text-2xl font-bold text-gray-800 mb-4">${title}</h2><div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">${productsHTML}</div></section>`;
         }
         function renderHomePage() {
             const flashSaleProducts = [...state.products].sort((a, b) => (b.oldPrice - b.price) - (a.oldPrice - a.price)).slice(0, 5);
             const justForYouProducts = [...state.products].sort(() => 0.5 - Math.random()).slice(0, 10);
-            const homeHTML = `<section class="mb-8 rounded-lg overflow-hidden"><img src="https://placehold.co/1200x400/FEF2F2/F97316?text=Biggest+Sale+of+The+Year!" alt="Hero Banner" class="w-full" onerror="this.onerror=null;this.src='https://placehold.co/1200x400/ccc/000?text=Banner+Error';"></section><section class="mb-8 bg-white p-4 rounded-lg shadow"><h3 class="font-bold text-gray-700 mb-3">Categories</h3><div class="grid grid-cols-4 md:grid-cols-8 gap-4 text-center text-sm">${state.categories.map(cat => `<a href="#" onclick="handleNavigation('category', '${cat}')" class="flex flex-col items-center hover:text-orange-500"><div class="bg-gray-100 p-3 rounded-full mb-1"><i data-lucide="tag"></i></div>${cat}</a>`).join('')}</div></section>${renderProductGrid(flashSaleProducts, 'Flash Sale')}${renderProductGrid(justForYouProducts, 'Just For You')}`;
+            const homeHTML = `<section class="mb-8 rounded-lg overflow-hidden"><img src="https://placehold.co/1200x400/FEF2F2/F97316?text=Biggest+Sale+of+The+Year!" alt="Hero Banner" class="w-full" onerror="this.onerror=null;this.src='https://placehold.co/1200x400/ccc/000?text=Banner+Error';"></section><section class="mb-8 bg-white p-4 rounded-lg shadow"><h3 class="font-bold text-gray-700 mb-3">Categories</h3><div class="grid grid-cols-4 md:grid-cols-8 gap-4 text-center text-sm">${state.categories.map(cat => `<a href="#" onclick="window.handleNavigation('category', '${cat}')" class="flex flex-col items-center hover:text-orange-500"><div class="bg-gray-100 p-3 rounded-full mb-1"><i data-lucide="tag"></i></div>${cat}</a>`).join('')}</div></section>${renderProductGrid(flashSaleProducts, 'Flash Sale')}${renderProductGrid(justForYouProducts, 'Just For You')}`;
             mainContent.innerHTML = homeHTML;
             lucide.createIcons();
         }
         function renderShopPage() { mainContent.innerHTML = renderProductGrid(state.products, 'All Products'); lucide.createIcons(); }
-        function renderFilteredProductsPage(title, products) { mainContent.innerHTML = `<div class="bg-white p-6 rounded-lg shadow-lg"><button onclick="handleNavigation('home')" class="mb-4 text-orange-500 hover:text-orange-700 flex items-center"><i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i> Back to Home</button>${renderProductGrid(products, title)}</div>`; lucide.createIcons(); }
+        function renderFilteredProductsPage(title, products) { mainContent.innerHTML = `<div class="bg-white p-6 rounded-lg shadow-lg"><button onclick="window.handleNavigation('home')" class="mb-4 text-orange-500 hover:text-orange-700 flex items-center"><i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i> Back to Home</button>${renderProductGrid(products, title)}</div>`; lucide.createIcons(); }
         
-        function renderProductDetailsPage() { 
-            const product = state.currentProduct; 
-            if (!product) { mainContent.innerHTML = `<p>Product not found.</p>`; return; } 
+        async function renderProductDetailsPage() { 
+            const productId = state.currentProduct;
+            const productRef = doc(db, 'products', productId);
+            const productSnap = await getDoc(productRef);
+
+            if (!productSnap.exists()) { mainContent.innerHTML = `<p>Product not found.</p>`; return; } 
+            const product = { id: productSnap.id, ...productSnap.data() };
 
             // Reviews Section
-            const reviewsHtml = product.reviews.length > 0 ? product.reviews.map(review => `
+            const reviewsHtml = product.reviews && product.reviews.length > 0 ? product.reviews.map(review => `
                 <div class="border-t py-4">
                     <div class="flex items-center mb-1">
                         <div class="flex text-yellow-400">${'<i data-lucide="star" class="w-4 h-4 fill-current"></i>'.repeat(review.rating)}</div>
                         <span class="ml-2 font-semibold text-gray-800">${review.user}</span>
                     </div>
                     <p class="text-gray-600 text-sm">${review.text}</p>
-                    <p class="text-xs text-gray-400 mt-1">${review.date}</p>
+                    <p class="text-xs text-gray-400 mt-1">${new Date(review.date.seconds * 1000).toLocaleDateString()}</p>
                 </div>
             `).join('') : '<p class="text-gray-500 text-sm">No reviews yet.</p>';
 
             const reviewFormHtml = state.isLoggedIn ? `
-                <form id="review-form" onsubmit="handlePostReview(event, ${product.id})" class="mt-4">
+                <form id="review-form" onsubmit="window.handlePostReview(event, '${product.id}')" class="mt-4">
                     <h4 class="font-semibold text-gray-800 mb-2">Write a Review</h4>
                     <div class="rating-input-group mb-2">
                         <input type="radio" id="star5" name="rating" value="5"><label for="star5">★</label>
@@ -412,24 +423,24 @@
                     <textarea id="review-text" rows="3" class="w-full p-2 border rounded-md" placeholder="Share your thoughts..." required></textarea>
                     <button type="submit" class="mt-2 bg-orange-500 text-white py-2 px-4 rounded-lg text-sm font-semibold hover:bg-orange-600">Post Review</button>
                 </form>
-            ` : '<p class="text-sm mt-4 text-gray-500">Please <a href="#" onclick="showModal(\'login-modal\')" class="text-blue-500 hover:underline">log in</a> to write a review.</p>';
+            ` : `<p class="text-sm mt-4 text-gray-500">Please <a href="#" onclick="window.showModal('login-modal')" class="text-blue-500 hover:underline">log in</a> to write a review.</p>`;
             
             // Q&A Section
-            const questionsHtml = product.questions.length > 0 ? product.questions.map(q => `
+            const questionsHtml = product.questions && product.questions.length > 0 ? product.questions.map(q => `
                 <div class="border-t py-3">
                     <p class="font-semibold text-gray-700"><span class="text-orange-500">Q:</span> ${q.question}</p>
                     <p class="text-gray-600 mt-1 pl-5"><span class="text-green-500">A:</span> ${q.answer || 'No answer yet.'}</p>
-                    <p class="text-xs text-gray-400 mt-1 pl-5">Asked by ${q.user} on ${q.date}</p>
+                    <p class="text-xs text-gray-400 mt-1 pl-5">Asked by ${q.user} on ${new Date(q.date.seconds * 1000).toLocaleDateString()}</p>
                 </div>
             `).join('') : '<p class="text-gray-500 text-sm">No questions yet.</p>';
 
             const questionFormHtml = state.isLoggedIn ? `
-                <form id="question-form" onsubmit="handlePostQuestion(event, ${product.id})" class="mt-4">
+                <form id="question-form" onsubmit="window.handlePostQuestion(event, '${product.id}')" class="mt-4">
                      <h4 class="font-semibold text-gray-800 mb-2">Ask a Question</h4>
                      <textarea id="question-text" rows="2" class="w-full p-2 border rounded-md" placeholder="Type your question here..." required></textarea>
                      <button type="submit" class="mt-2 bg-blue-500 text-white py-2 px-4 rounded-lg text-sm font-semibold hover:bg-blue-600">Ask Question</button>
                 </form>
-            ` : '<p class="text-sm mt-4 text-gray-500">Please <a href="#" onclick="showModal(\'login-modal\')" class="text-blue-500 hover:underline">log in</a> to ask a question.</p>';
+            ` : `<p class="text-sm mt-4 text-gray-500">Please <a href="#" onclick="window.showModal('login-modal')" class="text-blue-500 hover:underline">log in</a> to ask a question.</p>`;
 
             // "You Might Also Like" Section
             const relatedProducts = state.products.filter(p => p.category === product.category && p.id !== product.id).slice(0, 5);
@@ -444,7 +455,7 @@
                             <div class="flex items-center mt-2 text-sm text-gray-500"><div class="flex text-yellow-400">${'<i data-lucide="star" class="w-4 h-4 fill-current"></i>'.repeat(Math.floor(product.rating))}</div><span class="ml-2 text-blue-500 hover:underline cursor-pointer">${product.rating} Ratings</span><span class="mx-2">|</span><span class="text-blue-500 hover:underline cursor-pointer">${product.sold}+ Sold</span></div>
                             <div class="my-4"><span class="text-4xl font-bold text-orange-500">৳${product.price}</span><span class="text-lg text-gray-400 line-through ml-3">৳${product.oldPrice}</span></div>
                             <p class="text-gray-600 mb-6">This is a high-quality ${product.name.toLowerCase()} from the ${product.category} category. It's designed for durability and performance. Perfect for your daily needs. Limited stock available!</p>
-                            <div class="flex items-center space-x-4"><button onclick="handleAddToCart(${product.id})" class="flex-grow bg-orange-500 text-white py-3 px-6 rounded-lg font-semibold hover:bg-orange-600 transition-colors flex items-center justify-center space-x-2"><i data-lucide="shopping-cart" class="w-5 h-5"></i><span>Add to Cart</span></button><button onclick="handleBuyNow(${product.id})" class="flex-grow bg-blue-500 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-600 transition-colors">Buy Now</button></div>
+                            <div class="flex items-center space-x-4"><button onclick="window.handleAddToCart('${product.id}')" class="flex-grow bg-orange-500 text-white py-3 px-6 rounded-lg font-semibold hover:bg-orange-600 transition-colors flex items-center justify-center space-x-2"><i data-lucide="shopping-cart" class="w-5 h-5"></i><span>Add to Cart</span></button><button onclick="window.handleBuyNow('${product.id}')" class="flex-grow bg-blue-500 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-600 transition-colors">Buy Now</button></div>
                         </div>
                     </div>
                 </div>
@@ -465,20 +476,58 @@
             lucide.createIcons(); 
         }
 
-        function renderCartPage() { if (state.cart.length === 0) { mainContent.innerHTML = `<div class="text-center bg-white p-10 rounded-lg shadow-lg"><i data-lucide="shopping-cart" class="w-24 h-24 mx-auto text-gray-300"></i><h2 class="text-2xl font-bold mt-4">Your cart is empty!</h2><p class="text-gray-500 mt-2">Looks like you haven't added anything to your cart yet.</p><button onclick="handleNavigation('shop')" class="mt-6 bg-orange-500 text-white py-2 px-6 rounded-lg font-semibold hover:bg-orange-600">Continue Shopping</button></div>`; lucide.createIcons(); return; } const cartItemsHTML = state.cart.map(item => `<div class="flex items-center justify-between p-4 border-b"><div class="flex items-center space-x-4"><img src="${item.image}" alt="${item.name}" class="w-20 h-20 object-cover rounded" onerror="this.onerror=null;this.src='https://placehold.co/80x80/ccc/000?text=Error';"><div><h4 class="font-semibold">${item.name}</h4><p class="text-sm text-gray-500">${item.category}</p><button onclick="handleRemoveFromCart(${item.id})" class="text-xs text-red-500 hover:underline mt-1">Remove</button></div></div><div class="text-lg font-semibold text-orange-500">৳${(item.price * item.quantity).toFixed(2)}</div><div class="flex items-center border rounded"><button onclick="handleQuantityChange(${item.id}, ${item.quantity - 1})" class="px-2 py-1 text-gray-600 hover:bg-gray-100">-</button><span class="px-4">${item.quantity}</span><button onclick="handleQuantityChange(${item.id}, ${item.quantity + 1})" class="px-2 py-1 text-gray-600 hover:bg-gray-100">+</button></div></div>`).join(''); const subtotal = state.cart.reduce((total, item) => total + (item.price * item.quantity), 0); const shipping = 50; const total = subtotal + shipping; mainContent.innerHTML = `<div class="bg-white p-6 rounded-lg shadow-lg"><h2 class="text-3xl font-bold mb-6">Shopping Cart</h2><div class="grid grid-cols-1 lg:grid-cols-3 gap-8"><div class="lg:col-span-2">${cartItemsHTML}</div><div class="bg-gray-50 p-6 rounded-lg"><h3 class="text-xl font-bold mb-4">Order Summary</h3><div class="space-y-2"><div class="flex justify-between"><span>Subtotal</span><span>৳${subtotal.toFixed(2)}</span></div><div class="flex justify-between"><span>Shipping</span><span>৳${shipping.toFixed(2)}</span></div><div class="border-t my-2"></div><div class="flex justify-between font-bold text-lg"><span>Total</span><span>৳${total.toFixed(2)}</span></div></div><button onclick="handleNavigation('checkout')" class="w-full mt-6 bg-orange-500 text-white py-3 rounded-lg font-semibold hover:bg-orange-600">Proceed to Checkout</button></div></div></div>`; }
-        function renderCheckoutPage() { mainContent.innerHTML = `<div class="bg-white p-6 rounded-lg shadow-lg max-w-2xl mx-auto"><h2 class="text-3xl font-bold mb-6">Checkout</h2><form id="checkout-form" onsubmit="handlePlaceOrder(event)"><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="md:col-span-2"><label for="name" class="block text-sm font-medium text-gray-700">Full Name</label><input type="text" id="name" value="${state.currentUser ? state.currentUser.name : ''}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" required></div><div class="md:col-span-2"><label for="address" class="block text-sm font-medium text-gray-700">Shipping Address</label><input type="text" id="address" value="${state.currentUser.profile.address}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" required></div><div><label for="city" class="block text-sm font-medium text-gray-700">City</label><input type="text" id="city" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" required></div><div><label for="phone" class="block text-sm font-medium text-gray-700">Phone Number</label><input type="tel" id="phone" value="${state.currentUser.profile.phone}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" required></div></div><div class="mt-6 border-t pt-6"><h3 class="text-xl font-bold mb-4">Payment Method</h3><div class="space-y-4"><div class="flex items-center"><input type="radio" name="payment" class="h-4 w-4 text-orange-600 border-gray-300 focus:ring-orange-500" checked><label class="ml-3">Cash on Delivery</label></div><div class="flex items-center"><input type="radio" name="payment" class="h-4 w-4 text-orange-600 border-gray-300 focus:ring-orange-500"><label class="ml-3">Credit/Debit Card</label></div><div class="flex items-center"><input type="radio" name="payment" class="h-4 w-4 text-orange-600 border-gray-300 focus:ring-orange-500"><label class="ml-3">Mobile Banking</label></div></div></div><div class="mt-8 text-right"><button type="submit" class="bg-orange-500 text-white py-3 px-8 rounded-lg font-semibold hover:bg-orange-600">Place Order</button></div></form></div>`; }
-        function renderOrderConfirmationPage() { mainContent.innerHTML = `<div class="text-center bg-white p-10 rounded-lg shadow-lg"><i data-lucide="check-circle" class="w-24 h-24 mx-auto text-green-500"></i><h2 class="text-3xl font-bold mt-4">Order Placed Successfully!</h2><p class="text-gray-500 mt-2">Thank you for your purchase. You can check your order history in your profile.</p><button onclick="handleNavigation('home')" class="mt-8 bg-orange-500 text-white py-2 px-6 rounded-lg font-semibold hover:bg-orange-600">Continue Shopping</button></div>`; lucide.createIcons(); }
-        // ... (other page render functions)
+        function renderCartPage() { if (state.cart.length === 0) { mainContent.innerHTML = `<div class="text-center bg-white p-10 rounded-lg shadow-lg"><i data-lucide="shopping-cart" class="w-24 h-24 mx-auto text-gray-300"></i><h2 class="text-2xl font-bold mt-4">Your cart is empty!</h2><p class="text-gray-500 mt-2">Looks like you haven't added anything to your cart yet.</p><button onclick="window.handleNavigation('shop')" class="mt-6 bg-orange-500 text-white py-2 px-6 rounded-lg font-semibold hover:bg-orange-600">Continue Shopping</button></div>`; lucide.createIcons(); return; } const cartItemsHTML = state.cart.map(item => `<div class="flex items-center justify-between p-4 border-b"><div class="flex items-center space-x-4"><img src="${item.image}" alt="${item.name}" class="w-20 h-20 object-cover rounded" onerror="this.onerror=null;this.src='https://placehold.co/80x80/ccc/000?text=Error';"><div><h4 class="font-semibold">${item.name}</h4><p class="text-sm text-gray-500">${item.category}</p><button onclick="window.handleRemoveFromCart('${item.id}')" class="text-xs text-red-500 hover:underline mt-1">Remove</button></div></div><div class="text-lg font-semibold text-orange-500">৳${(item.price * item.quantity).toFixed(2)}</div><div class="flex items-center border rounded"><button onclick="window.handleQuantityChange('${item.id}', ${item.quantity - 1})" class="px-2 py-1 text-gray-600 hover:bg-gray-100">-</button><span class="px-4">${item.quantity}</span><button onclick="window.handleQuantityChange('${item.id}', ${item.quantity + 1})" class="px-2 py-1 text-gray-600 hover:bg-gray-100">+</button></div></div>`).join(''); const subtotal = state.cart.reduce((total, item) => total + (item.price * item.quantity), 0); const shipping = 50; const total = subtotal + shipping; mainContent.innerHTML = `<div class="bg-white p-6 rounded-lg shadow-lg"><h2 class="text-3xl font-bold mb-6">Shopping Cart</h2><div class="grid grid-cols-1 lg:grid-cols-3 gap-8"><div class="lg:col-span-2">${cartItemsHTML}</div><div class="bg-gray-50 p-6 rounded-lg"><h3 class="text-xl font-bold mb-4">Order Summary</h3><div class="space-y-2"><div class="flex justify-between"><span>Subtotal</span><span>৳${subtotal.toFixed(2)}</span></div><div class="flex justify-between"><span>Shipping</span><span>৳${shipping.toFixed(2)}</span></div><div class="border-t my-2"></div><div class="flex justify-between font-bold text-lg"><span>Total</span><span>৳${total.toFixed(2)}</span></div></div><button onclick="window.handleNavigation('checkout')" class="w-full mt-6 bg-orange-500 text-white py-3 rounded-lg font-semibold hover:bg-orange-600">Proceed to Checkout</button></div></div></div>`; }
+        function renderCheckoutPage() { mainContent.innerHTML = `<div class="bg-white p-6 rounded-lg shadow-lg max-w-2xl mx-auto"><h2 class="text-3xl font-bold mb-6">Checkout</h2><form id="checkout-form" onsubmit="window.handlePlaceOrder(event)"><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="md:col-span-2"><label for="name" class="block text-sm font-medium text-gray-700">Full Name</label><input type="text" id="name" value="${state.currentUser ? state.currentUser.displayName : ''}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" required></div><div class="md:col-span-2"><label for="address" class="block text-sm font-medium text-gray-700">Shipping Address</label><input type="text" id="address" value="${state.currentUser.profile?.address || ''}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" required></div><div><label for="city" class="block text-sm font-medium text-gray-700">City</label><input type="text" id="city" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" required></div><div><label for="phone" class="block text-sm font-medium text-gray-700">Phone Number</label><input type="tel" id="phone" value="${state.currentUser.profile?.phone || ''}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" required></div></div><div class="mt-6 border-t pt-6"><h3 class="text-xl font-bold mb-4">Payment Method</h3><div class="space-y-4"><div class="flex items-center"><input type="radio" name="payment" class="h-4 w-4 text-orange-600 border-gray-300 focus:ring-orange-500" checked><label class="ml-3">Cash on Delivery</label></div><div class="flex items-center"><input type="radio" name="payment" class="h-4 w-4 text-orange-600 border-gray-300 focus:ring-orange-500"><label class="ml-3">Credit/Debit Card</label></div><div class="flex items-center"><input type="radio" name="payment" class="h-4 w-4 text-orange-600 border-gray-300 focus:ring-orange-500"><label class="ml-3">Mobile Banking</label></div></div></div><div class="mt-8 text-right"><button type="submit" class="bg-orange-500 text-white py-3 px-8 rounded-lg font-semibold hover:bg-orange-600">Place Order</button></div></form></div>`; }
+        function renderOrderConfirmationPage() { mainContent.innerHTML = `<div class="text-center bg-white p-10 rounded-lg shadow-lg"><i data-lucide="check-circle" class="w-24 h-24 mx-auto text-green-500"></i><h2 class="text-3xl font-bold mt-4">Order Placed Successfully!</h2><p class="text-gray-500 mt-2">Thank you for your purchase. You can check your order history in your profile.</p><button onclick="window.handleNavigation('home')" class="mt-8 bg-orange-500 text-white py-2 px-6 rounded-lg font-semibold hover:bg-orange-600">Continue Shopping</button></div>`; lucide.createIcons(); }
+        
         function renderAboutUsPage() { mainContent.innerHTML = `<div class="bg-white p-8 rounded-lg shadow-lg prose max-w-none"><h2>About KongShop</h2><p>Welcome to KongShop, a project dedicated to demonstrating a modern e-commerce platform...</p></div>`; }
         function renderHowToBuyPage() { mainContent.innerHTML = `<div class="bg-white p-8 rounded-lg shadow-lg prose max-w-none"><h2 class="text-center">How to Buy: 5 Easy Steps</h2>...</div>`; lucide.createIcons(); }
         function renderContactPage() { mainContent.innerHTML = `<div class="bg-white p-8 rounded-lg shadow-lg">...</div>`; lucide.createIcons(); }
         function renderPolicyPage(title, content) { mainContent.innerHTML = `<div class="bg-white p-8 rounded-lg shadow-lg prose max-w-none"><h2>${title}</h2>${content}</div>`; }
         
         // --- ADMIN RENDER FUNCTIONS ---
-        function renderAdminPanel() { let content = ''; switch(state.adminCurrentTab) { case 'orders': content = renderAdminOrders(); break; case 'products': content = renderAdminProducts(); break; case 'categories': content = renderAdminCategories(); break; } mainContent.innerHTML = `<div class="bg-white p-6 rounded-lg shadow-lg"><h2 class="text-3xl font-bold mb-4">Admin Panel</h2><div class="border-b border-gray-200"><nav class="-mb-px flex space-x-6" aria-label="Tabs"><button onclick="setAdminTab('orders')" class="admin-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${state.adminCurrentTab === 'orders' ? 'active' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}">Orders</button><button onclick="setAdminTab('products')" class="admin-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${state.adminCurrentTab === 'products' ? 'active' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}">Products</button><button onclick="setAdminTab('categories')" class="admin-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${state.adminCurrentTab === 'categories' ? 'active' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}">Categories</button></nav></div><div id="admin-content" class="mt-6">${content}</div></div>`; lucide.createIcons(); }
-        function renderAdminOrders() { if (state.orders.length === 0) return '<p>No orders found.</p>'; const ordersHtml = state.orders.map(order => `<tr class="bg-white hover:bg-gray-50"><td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#${order.id}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${order.customerName}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${order.date}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">৳${order.total.toFixed(2)}</td><td class="px-6 py-4 whitespace-nowrap text-sm"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${order.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}">${order.status}</span></td><td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">${order.status === 'Pending' ? `<button onclick="handleConfirmOrder(${order.id})" class="text-indigo-600 hover:text-indigo-900">Confirm</button>` : ''}</td></tr>`).join(''); return `<div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th><th scope="col" class="relative px-6 py-3"><span class="sr-only">Action</span></th></tr></thead><tbody class="bg-white divide-y divide-gray-200">${ordersHtml}</tbody></table></div>`; }
-        function renderAdminProducts() { const productsHtml = state.products.map(p => `<tr class="hover:bg-gray-50"><td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${p.name}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${p.category}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">৳${p.price}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${p.sold}</td><td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-4"><button onclick="openProductForm(${p.id})" class="text-indigo-600 hover:text-indigo-900">Edit</button><button onclick="handleDeleteProduct(${p.id})" class="text-red-600 hover:text-red-900">Delete</button></td></tr>`).join(''); return `<div class="flex justify-end mb-4"><button onclick="openProductForm()" class="bg-orange-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-orange-600 flex items-center space-x-2"><i data-lucide="plus-circle" class="w-5 h-5"></i><span>Add Product</span></button></div><div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sold</th><th scope="col" class="relative px-6 py-3"><span class="sr-only">Actions</span></th></tr></thead><tbody class="bg-white divide-y divide-gray-200">${productsHtml}</tbody></table></div>`; }
-        function renderAdminCategories() { const categoriesHtml = state.categories.map(c => `<span class="bg-gray-100 text-gray-800 text-sm font-medium mr-2 mb-2 inline-block px-2.5 py-0.5 rounded">${c}</span>`).join(''); return `<div><h3 class="text-lg font-medium leading-6 text-gray-900">Existing Categories</h3><div class="mt-4 flex flex-wrap">${categoriesHtml}</div></div><div class="mt-8 border-t pt-6"><h3 class="text-lg font-medium leading-6 text-gray-900">Add New Category</h3><form onsubmit="handleSaveCategory(event)" class="mt-4 flex items-center space-x-3"><input type="text" id="new-category-name" class="block w-full max-w-xs rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" placeholder="New category name" required><button type="submit" class="bg-orange-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-orange-600">Add</button></form></div>`; }
+        function renderAdminPanel() { 
+            let content = ''; 
+            switch(state.adminCurrentTab) { 
+                case 'dashboard': content = renderAdminDashboard(); break;
+                case 'orders': content = renderAdminOrders(); break; 
+                case 'products': content = renderAdminProducts(); break; 
+                case 'categories': content = renderAdminCategories(); break; 
+            } 
+            mainContent.innerHTML = `<div class="bg-white p-6 rounded-lg shadow-lg"><h2 class="text-3xl font-bold mb-4">Admin Panel</h2><div class="border-b border-gray-200"><nav class="-mb-px flex space-x-6" aria-label="Tabs">
+            <button onclick="window.setAdminTab('dashboard')" class="admin-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${state.adminCurrentTab === 'dashboard' ? 'active' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}">Dashboard</button>
+            <button onclick="window.setAdminTab('orders')" class="admin-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${state.adminCurrentTab === 'orders' ? 'active' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}">Orders</button>
+            <button onclick="window.setAdminTab('products')" class="admin-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${state.adminCurrentTab === 'products' ? 'active' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}">Products</button>
+            <button onclick="window.setAdminTab('categories')" class="admin-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${state.adminCurrentTab === 'categories' ? 'active' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}">Categories</button>
+            </nav></div><div id="admin-content" class="mt-6">${content}</div></div>`; 
+            lucide.createIcons(); 
+        }
+        function renderAdminDashboard() {
+            const { income, pending, completed, canceled } = state.dashboardStats;
+            return `
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="bg-blue-100 p-6 rounded-lg shadow">
+                        <h3 class="text-sm font-medium text-blue-800">Total Income</h3>
+                        <p class="mt-2 text-3xl font-bold text-blue-900">৳${income.toFixed(2)}</p>
+                    </div>
+                     <div class="bg-yellow-100 p-6 rounded-lg shadow">
+                        <h3 class="text-sm font-medium text-yellow-800">Pending Orders</h3>
+                        <p class="mt-2 text-3xl font-bold text-yellow-900">${pending}</p>
+                    </div>
+                     <div class="bg-green-100 p-6 rounded-lg shadow">
+                        <h3 class="text-sm font-medium text-green-800">Completed Orders</h3>
+                        <p class="mt-2 text-3xl font-bold text-green-900">${completed}</p>
+                    </div>
+                     <div class="bg-red-100 p-6 rounded-lg shadow">
+                        <h3 class="text-sm font-medium text-red-800">Canceled Orders</h3>
+                        <p class="mt-2 text-3xl font-bold text-red-900">${canceled}</p>
+                    </div>
+                </div>
+            `;
+        }
+        function renderAdminOrders() { if (state.orders.length === 0) return '<p>No orders found.</p>'; const ordersHtml = state.orders.map(order => `<tr class="bg-white hover:bg-gray-50"><td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#${order.id.substring(0,6)}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${order.customerName}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${new Date(order.date.seconds * 1000).toLocaleDateString()}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">৳${order.total.toFixed(2)}</td><td class="px-6 py-4 whitespace-nowrap text-sm"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${order.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' : order.status === 'Shipped' ? 'bg-blue-100 text-blue-800' : order.status === 'Completed' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${order.status}</span></td><td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">${order.status === 'Pending' ? `<button onclick="window.handleUpdateOrderStatus('${order.id}', 'Shipped')" class="text-indigo-600 hover:text-indigo-900">Ship</button>` : order.status === 'Shipped' ? `<button onclick="window.handleUpdateOrderStatus('${order.id}', 'Completed')" class="text-green-600 hover:text-green-900">Complete</button>` : ''} <button onclick="window.handleUpdateOrderStatus('${order.id}', 'Canceled')" class="text-red-600 hover:text-red-900 ml-2">Cancel</button></td></tr>`).join(''); return `<div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th><th scope="col" class="relative px-6 py-3"><span class="sr-only">Action</span></th></tr></thead><tbody class="bg-white divide-y divide-gray-200">${ordersHtml}</tbody></table></div>`; }
+        function renderAdminProducts() { const productsHtml = state.products.map(p => `<tr class="hover:bg-gray-50"><td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${p.name}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${p.category}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">৳${p.price}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${p.sold}</td><td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-4"><button onclick="window.openProductForm('${p.id}')" class="text-indigo-600 hover:text-indigo-900">Edit</button><button onclick="window.handleDeleteProduct('${p.id}')" class="text-red-600 hover:text-red-900">Delete</button></td></tr>`).join(''); return `<div class="flex justify-end mb-4"><button onclick="window.openProductForm()" class="bg-orange-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-orange-600 flex items-center space-x-2"><i data-lucide="plus-circle" class="w-5 h-5"></i><span>Add Product</span></button></div><div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sold</th><th scope="col" class="relative px-6 py-3"><span class="sr-only">Actions</span></th></tr></thead><tbody class="bg-white divide-y divide-gray-200">${productsHtml}</tbody></table></div>`; }
+        function renderAdminCategories() { const categoriesHtml = state.categories.map(c => `<span class="bg-gray-100 text-gray-800 text-sm font-medium mr-2 mb-2 inline-block px-2.5 py-0.5 rounded">${c}</span>`).join(''); return `<div><h3 class="text-lg font-medium leading-6 text-gray-900">Existing Categories</h3><div class="mt-4 flex flex-wrap">${categoriesHtml}</div></div><div class="mt-8 border-t pt-6"><h3 class="text-lg font-medium leading-6 text-gray-900">Add New Category</h3><form onsubmit="window.handleSaveCategory(event)" class="mt-4 flex items-center space-x-3"><input type="text" id="new-category-name" class="block w-full max-w-xs rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" placeholder="New category name" required><button type="submit" class="bg-orange-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-orange-600">Add</button></form></div>`; }
         
         // --- USER PROFILE RENDER FUNCTIONS ---
         function renderProfilePage() {
@@ -492,11 +541,11 @@
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
                     <div class="md:col-span-1">
                         <div class="bg-white p-4 rounded-lg shadow-lg">
-                            <h3 class="font-bold text-lg mb-4">Hello, ${state.currentUser.name}</h3>
+                            <h3 class="font-bold text-lg mb-4">Hello, ${state.currentUser.displayName}</h3>
                             <nav class="flex flex-col space-y-2">
-                                <button onclick="setProfileTab('profile')" class="profile-tab text-left w-full px-3 py-2 text-sm font-medium rounded-md ${state.profileCurrentTab === 'profile' ? 'active' : 'text-gray-600 hover:bg-gray-100'}">My Profile</button>
-                                <button onclick="setProfileTab('orders')" class="profile-tab text-left w-full px-3 py-2 text-sm font-medium rounded-md ${state.profileCurrentTab === 'orders' ? 'active' : 'text-gray-600 hover:bg-gray-100'}">My Orders</button>
-                                <button onclick="setProfileTab('settings')" class="profile-tab text-left w-full px-3 py-2 text-sm font-medium rounded-md ${state.profileCurrentTab === 'settings' ? 'active' : 'text-gray-600 hover:bg-gray-100'}">Settings</button>
+                                <button onclick="window.setProfileTab('profile')" class="profile-tab text-left w-full px-3 py-2 text-sm font-medium rounded-md ${state.profileCurrentTab === 'profile' ? 'active' : 'text-gray-600 hover:bg-gray-100'}">My Profile</button>
+                                <button onclick="window.setProfileTab('orders')" class="profile-tab text-left w-full px-3 py-2 text-sm font-medium rounded-md ${state.profileCurrentTab === 'orders' ? 'active' : 'text-gray-600 hover:bg-gray-100'}">My Orders</button>
+                                <button onclick="window.setProfileTab('settings')" class="profile-tab text-left w-full px-3 py-2 text-sm font-medium rounded-md ${state.profileCurrentTab === 'settings' ? 'active' : 'text-gray-600 hover:bg-gray-100'}">Settings</button>
                             </nav>
                         </div>
                     </div>
@@ -509,35 +558,35 @@
             const user = state.currentUser;
             return `
                 <h2 class="text-2xl font-bold mb-6">My Profile</h2>
-                <form id="profile-form" onsubmit="handleUpdateProfile(event)">
+                <form id="profile-form" onsubmit="window.handleUpdateProfile(event)">
                     <div class="space-y-4">
-                        <div><label class="block text-sm font-medium text-gray-700">Full Name</label><input type="text" id="profile-name" value="${user.name}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" required></div>
+                        <div><label class="block text-sm font-medium text-gray-700">Full Name</label><input type="text" id="profile-name" value="${user.displayName}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" required></div>
                         <div><label class="block text-sm font-medium text-gray-700">Email</label><input type="email" value="${user.email}" class="mt-1 block w-full rounded-md border-gray-300 bg-gray-100 shadow-sm" disabled></div>
-                        <div><label class="block text-sm font-medium text-gray-700">Phone Number</label><input type="tel" id="profile-phone" value="${user.profile.phone}" placeholder="e.g., 01712345678" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"></div>
-                        <div><label class="block text-sm font-medium text-gray-700">Shipping Address</label><textarea id="profile-address" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500">${user.profile.address}</textarea></div>
+                        <div><label class="block text-sm font-medium text-gray-700">Phone Number</label><input type="tel" id="profile-phone" value="${user.profile?.phone || ''}" placeholder="e.g., 01712345678" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"></div>
+                        <div><label class="block text-sm font-medium text-gray-700">Shipping Address</label><textarea id="profile-address" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500">${user.profile?.address || ''}</textarea></div>
                     </div>
                     <div class="text-right mt-6"><button type="submit" class="bg-orange-500 text-white py-2 px-6 rounded-lg font-semibold hover:bg-orange-600">Save Changes</button></div>
                 </form>
             `;
         }
         function renderProfileOrders() {
-            const userOrders = state.orders.filter(o => o.customerName === state.currentUser.name);
+            const userOrders = state.orders.filter(o => o.userId === state.currentUser.uid);
             if(userOrders.length === 0) return `<h2 class="text-2xl font-bold mb-6">My Orders</h2><p>You have not placed any orders yet.</p>`;
 
             const ordersHtml = userOrders.map(order => `
                 <tr class="hover:bg-gray-50">
-                    <td class="px-4 py-3 text-sm font-medium">#${order.id}</td>
-                    <td class="px-4 py-3 text-sm">${order.date}</td>
+                    <td class="px-4 py-3 text-sm font-medium">#${order.id.substring(0,6)}</td>
+                    <td class="px-4 py-3 text-sm">${new Date(order.date.seconds * 1000).toLocaleDateString()}</td>
                     <td class="px-4 py-3 text-sm">৳${order.total.toFixed(2)}</td>
-                    <td class="px-4 py-3 text-sm"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${order.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}">${order.status}</span></td>
-                    <td class="px-4 py-3 text-sm text-right"><button onclick="showOrderDetails(${order.id})" class="text-indigo-600 hover:text-indigo-900">View</button></td>
+                    <td class="px-4 py-3 text-sm"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${order.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' : order.status === 'Shipped' ? 'bg-blue-100 text-blue-800' : order.status === 'Completed' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${order.status}</span></td>
+                    <td class="px-4 py-3 text-sm text-right"><button onclick="window.showOrderDetails('${order.id}')" class="text-indigo-600 hover:text-indigo-900">View</button></td>
                 </tr>`).join('');
             return `<h2 class="text-2xl font-bold mb-6">My Orders</h2><div class="overflow-x-auto"><table class="min-w-full divide-y"><thead><tr><th class="px-4 py-2 text-left">Order ID</th><th class="px-4 py-2 text-left">Date</th><th class="px-4 py-2 text-left">Total</th><th class="px-4 py-2 text-left">Status</th><th></th></tr></thead><tbody>${ordersHtml}</tbody></table></div>`;
         }
         function renderProfileSettings() {
             return `
                 <h2 class="text-2xl font-bold mb-6">Settings</h2>
-                <form id="password-change-form" onsubmit="handlePasswordChange(event)">
+                <form id="password-change-form" onsubmit="window.handlePasswordChange(event)">
                     <div class="space-y-4 max-w-md">
                         <h3 class="text-lg font-medium">Change Password</h3>
                         <div><label class="block text-sm font-medium text-gray-700">Current Password</label><input type="password" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required></div>
@@ -549,25 +598,35 @@
             `;
         }
 
-        // --- EVENT HANDLERS & LOGIC ---
+        // --- GLOBAL EVENT HANDLERS & LOGIC ---
         function updateCartCount() { const cartCountEl = document.getElementById('cart-count'); if (cartCountEl) { cartCountEl.textContent = state.cart.reduce((sum, item) => sum + item.quantity, 0); } }
         function showToast(message, type = 'success') { toastElement.textContent = message; toastElement.className = `fixed bottom-5 right-5 text-white py-2 px-4 rounded-lg shadow-lg transform transition-transform duration-300 z-50 ${type === 'success' ? 'bg-green-500' : 'bg-red-500'}`; toastElement.classList.remove('translate-x-[120%]'); setTimeout(() => { toastElement.classList.add('translate-x-[120%]'); }, 3000); }
-        function handleAddToCart(productId) { const product = state.products.find(p => p.id === productId); const existingItem = state.cart.find(item => item.id === productId); if (existingItem) { existingItem.quantity++; } else { state.cart.push({ ...product, quantity: 1 }); } updateCartCount(); showToast('Item added to cart!'); }
+        function handleAddToCart(productId) { 
+            const product = state.products.find(p => p.id === productId); 
+            const existingItem = state.cart.find(item => item.id === productId); 
+            if (existingItem) { 
+                existingItem.quantity++; 
+            } else { 
+                state.cart.push({ ...product, quantity: 1 }); 
+            } 
+            updateCartCount(); 
+            showToast('Item added to cart!'); 
+        }
         function handleBuyNow(productId) { if (!state.isLoggedIn) { showToast('Please log in to buy.', 'error'); showModal('login-modal'); return; } const product = state.products.find(p => p.id === productId); state.cart = [{ ...product, quantity: 1 }]; updateCartCount(); handleNavigation('checkout'); }
         function handleRemoveFromCart(productId) { state.cart = state.cart.filter(item => item.id !== productId); updateCartCount(); renderCartPage(); }
         function handleQuantityChange(productId, newQuantity) { if (newQuantity < 1) { handleRemoveFromCart(productId); return; } const cartItem = state.cart.find(item => item.id === productId); if(cartItem) { cartItem.quantity = newQuantity; updateCartCount(); renderCartPage(); } }
         function handleSearch(force = false) { const query = searchInput.value.toLowerCase(); if (force || query) { handleNavigation('search', query); } else if (!query) { handleNavigation('home'); } }
         
-        function notifyDiscord(newOrder) {
+        async function notifyDiscord(newOrder) {
             const webhookUrl = 'https://discord.com/api/webhooks/1430155666638639146/RfCydlHbNTfJBmvo0CkHkfZMmVOzNAsjhWeX-wRXd5SSF1oAB8Pocm4HluKUwL2Goyjy';
             const itemsDescription = newOrder.items.map(item => `${item.name} (x${item.quantity}) - ৳${(item.price * item.quantity).toFixed(2)}`).join('\n');
             const discordPayload = {
-                content: `New order #${newOrder.id} from ${newOrder.customerName}!`,
+                content: `New order from ${newOrder.customerName}!`,
                 embeds: [{
                     title: '🎉 New Order Received!',
                     color: 16747520, // Orange
                     fields: [
-                        { name: 'Order ID', value: `#${newOrder.id}`, inline: true },
+                        { name: 'Order ID', value: `#${newOrder.id.substring(0,6)}`, inline: true },
                         { name: 'Customer', value: newOrder.customerName, inline: true },
                         { name: 'Total Amount', value: `৳${newOrder.total.toFixed(2)}`, inline: true },
                         { name: 'Items Ordered', value: "```" + itemsDescription + "```" }
@@ -577,31 +636,35 @@
                 }]
             };
 
-            fetch(webhookUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(discordPayload),
-            }).catch(error => console.error('Error sending Discord notification:', error));
+            try {
+                await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(discordPayload),
+                });
+            } catch (error) {
+                console.error('Error sending Discord notification:', error);
+            }
         }
 
-        function handlePlaceOrder(event) {
+        async function handlePlaceOrder(event) {
             event.preventDefault();
             if (!state.isLoggedIn) {
                 showToast('Please log in to place an order.', 'error');
                 showModal('login-modal');
                 return;
             }
-            const newOrder = {
-                id: Math.floor(104 + Math.random() * 900),
-                customerName: state.currentUser.name,
+            const orderData = {
+                userId: state.currentUser.uid,
+                customerName: state.currentUser.displayName,
                 total: state.cart.reduce((total, item) => total + (item.price * item.quantity), 0) + 50,
                 status: 'Pending',
-                date: new Date().toISOString().slice(0, 10),
-                items: state.cart.map(i => ({ name: i.name, quantity: i.quantity, price: i.price }))
+                date: new Date(),
+                items: state.cart
             };
-            state.orders.push(newOrder);
             
-            notifyDiscord(newOrder);
+            const newOrderRef = await addDoc(collection(db, "orders"), orderData);
+            await notifyDiscord({ ...orderData, id: newOrderRef.id });
 
             state.cart = [];
             updateCartCount();
@@ -627,7 +690,7 @@
                     case 'contact': renderContactPage(); break;
                     case 'admin': renderAdminPanel(); break;
                     case 'profile': renderProfilePage(); break;
-                    case 'product': state.currentProduct = state.products.find(p => p.id === data); renderProductDetailsPage(); break;
+                    case 'product': state.currentProduct = data; renderProductDetailsPage(); break;
                     case 'cart': renderCartPage(); break;
                     case 'checkout': renderCheckoutPage(); break;
                     case 'orderConfirmation': renderOrderConfirmationPage(); break;
@@ -640,20 +703,88 @@
             }, 300);
         }
 
-        // --- AUTH & MODAL LOGIC ---
-        function showModal(modalId) { const modal = document.getElementById(modalId); if (modal) modal.classList.remove('hidden'); }
-        function hideModal(modalId) { const modal = document.getElementById(modalId); if (modal) modal.classList.add('hidden'); }
-        function togglePasswordVisibility(inputId) { const input = document.getElementById(inputId); const icon = input.nextElementSibling.querySelector('i'); if (input.type === 'password') { input.type = 'text'; icon.setAttribute('data-lucide', 'eye-off'); } else { input.type = 'password'; icon.setAttribute('data-lucide', 'eye'); } lucide.createIcons(); }
-        function handleLogin(event) { event.preventDefault(); const email = document.getElementById('login-email').value; const name = email.split('@')[0]; state.isLoggedIn = true; state.currentUser = { name: name, email: email, profile: { phone: '', address: ''} }; if (email.toLowerCase() === 'admin@kongshop.com') { state.isAdmin = true; showToast('Admin login successful!'); } else { showToast(`Welcome back, ${state.currentUser.name}!`); } updateHeaderUI(); hideModal('login-modal'); }
-        function handleSignup(event) { event.preventDefault(); const name = document.getElementById('signup-name').value; const email = document.getElementById('signup-email').value; state.isLoggedIn = true; state.currentUser = { name: name, email: email, profile: { phone: '', address: ''} }; state.isAdmin = false; updateHeaderUI(); hideModal('signup-modal'); showToast(`Welcome, ${state.currentUser.name}! Your account is created.`); }
-        function handleLogout() { state.isLoggedIn = false; state.isAdmin = false; state.currentUser = null; updateHeaderUI(); showToast(`You have been logged out.`); handleNavigation('home'); }
+        // --- AUTH & MODAL LOGIC (now on window object) ---
+        window.showModal = (modalId) => { const modal = document.getElementById(modalId); if (modal) modal.classList.remove('hidden'); }
+        window.hideModal = (modalId) => { const modal = document.getElementById(modalId); if (modal) modal.classList.add('hidden'); }
+        window.togglePasswordVisibility = (inputId) => { const input = document.getElementById(inputId); const icon = input.nextElementSibling.querySelector('i'); if (input.type === 'password') { input.type = 'text'; icon.setAttribute('data-lucide', 'eye-off'); } else { input.type = 'password'; icon.setAttribute('data-lucide', 'eye'); } lucide.createIcons(); }
         
-        // --- ADMIN ACTION HANDLERS ---
-        function setAdminTab(tab) { state.adminCurrentTab = tab; renderAdminPanel(); }
-        function handleConfirmOrder(orderId) { const order = state.orders.find(o => o.id === orderId); if (order) { order.status = 'Shipped'; } renderAdminPanel(); showToast(`Order #${orderId} confirmed.`); }
-        function handleDeleteProduct(productId) { if (confirm('Are you sure you want to delete this product?')) { state.products = state.products.filter(p => p.id !== productId); renderAdminPanel(); showToast('Product deleted successfully.', 'success'); } }
+        async function handleGoogleSignIn() {
+            try {
+                const result = await signInWithPopup(auth, googleProvider);
+                // The onAuthStateChanged listener will handle the rest.
+                hideModal('login-modal');
+            } catch (error) {
+                console.error("Google Sign-in Error:", error);
+                showToast(`Error: ${error.message}`, 'error');
+            }
+        }
+        window.handleGoogleSignIn = handleGoogleSignIn;
+
+        async function handleLogin(event) { 
+            event.preventDefault(); 
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                // onAuthStateChanged will handle UI updates
+                hideModal('login-modal');
+            } catch (error) {
+                showToast(`Login failed: ${error.message}`, 'error');
+            }
+        }
+        window.handleLogin = handleLogin;
+
+        async function handleSignup(event) { 
+            event.preventDefault(); 
+            const name = document.getElementById('signup-name').value; 
+            const email = document.getElementById('signup-email').value; 
+            const password = document.getElementById('signup-password').value;
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                await setDoc(doc(db, "users", user.uid), {
+                    uid: user.uid,
+                    displayName: name,
+                    email: user.email,
+                    isAdmin: false,
+                    profile: { phone: '', address: ''}
+                });
+                // onAuthStateChanged will handle UI updates
+                hideModal('signup-modal');
+            } catch (error) {
+                showToast(`Signup failed: ${error.message}`, 'error');
+            }
+        }
+        window.handleSignup = handleSignup;
         
-        function handleImageUpload(event) {
+        async function handleLogout() { 
+            await signOut(auth);
+            // onAuthStateChanged will handle UI updates
+        }
+        window.handleLogout = handleLogout;
+        
+        // --- ADMIN ACTION HANDLERS (now on window object) ---
+        window.setAdminTab = (tab) => { state.adminCurrentTab = tab; renderAdminPanel(); }
+        
+        async function handleUpdateOrderStatus(orderId, newStatus) {
+            const orderRef = doc(db, 'orders', orderId);
+            await updateDoc(orderRef, { status: newStatus });
+            showToast(`Order #${orderId.substring(0,6)} updated to ${newStatus}.`);
+            // The onSnapshot listener will re-render the list automatically
+        }
+        window.handleUpdateOrderStatus = handleUpdateOrderStatus;
+
+        async function handleDeleteProduct(productId) { 
+            if (confirm('Are you sure you want to delete this product?')) { 
+                await deleteDoc(doc(db, "products", productId));
+                showToast('Product deleted successfully.', 'success'); 
+                // onSnapshot will handle UI update
+            } 
+        }
+        window.handleDeleteProduct = handleDeleteProduct;
+
+        
+        window.handleImageUpload = (event) => {
             const file = event.target.files[0];
             if (file) {
                 const reader = new FileReader();
@@ -665,10 +796,10 @@
             }
         }
 
-        function openProductForm(productId = null) {
+        window.openProductForm = (productId = null) => {
             const form = document.getElementById('product-form');
             form.reset();
-            document.getElementById('product-image-upload').onchange = handleImageUpload;
+            document.getElementById('product-image-upload').onchange = window.handleImageUpload;
             const modalTitle = document.getElementById('product-modal-title');
             const categorySelect = document.getElementById('product-category');
             const imagePreview = document.getElementById('product-image-preview');
@@ -696,17 +827,14 @@
             lucide.createIcons();
         }
         
-        function handleSaveProduct(event) {
+        async function handleSaveProduct(event) {
             event.preventDefault();
             const id = document.getElementById('product-id').value;
             const imageUrl = document.getElementById('product-image').value;
 
-            if (!imageUrl) {
-                showToast('Please upload an image for the product.', 'error');
-                return;
-            }
+            if (!imageUrl) { showToast('Please upload an image for the product.', 'error'); return; }
 
-            const newProductData = { 
+            const productData = { 
                 name: document.getElementById('product-name').value, 
                 category: document.getElementById('product-category').value, 
                 price: parseFloat(document.getElementById('product-price').value), 
@@ -716,72 +844,191 @@
                 reviews: [], questions: [] 
             }; 
 
-            if (id) { 
-                const index = state.products.findIndex(p => p.id == id);
-                newProductData.reviews = state.products[index].reviews; // Preserve old reviews
-                newProductData.questions = state.products[index].questions; // Preserve old questions
-                state.products[index] = { ...state.products[index], ...newProductData }; 
+            if (id) {
+                const productRef = doc(db, 'products', id);
+                await updateDoc(productRef, productData);
                 showToast('Product updated successfully!'); 
             } else { 
-                newProductData.id = Date.now(); 
-                state.products.push(newProductData); 
+                await addDoc(collection(db, "products"), productData);
                 showToast('Product added successfully!'); 
             } 
             hideModal('product-modal'); 
-            renderAdminPanel(); 
+            // onSnapshot will handle UI update
         }
+        window.handleSaveProduct = handleSaveProduct;
 
-        function handleSaveCategory(event) { event.preventDefault(); const newCategory = document.getElementById('new-category-name').value; if (newCategory && !state.categories.includes(newCategory)) { state.categories.push(newCategory); renderAdminPanel(); showToast(`Category "${newCategory}" added.`); document.getElementById('new-category-name').value = ''; } else { showToast('Category is empty or already exists.', 'error'); } }
-        
+        async function handleSaveCategory(event) { event.preventDefault(); const newCategory = document.getElementById('new-category-name').value; if (newCategory && !state.categories.includes(newCategory)) { state.categories.push(newCategory); /* In a real app, you'd save this to Firestore */ renderAdminPanel(); showToast(`Category "${newCategory}" added.`); document.getElementById('new-category-name').value = ''; } else { showToast('Category is empty or already exists.', 'error'); } }
+        window.handleSaveCategory = handleSaveCategory;
+
         // --- PRODUCT PAGE INTERACTION HANDLERS ---
-        function handlePostReview(event, productId) {
+        async function handlePostReview(event, productId) {
             event.preventDefault();
             const rating = event.target.rating.value;
             const text = event.target['review-text'].value;
-            if (!rating) {
-                showToast('Please select a rating.', 'error');
-                return;
-            }
-            const product = state.products.find(p => p.id === productId);
-            product.reviews.unshift({
-                user: state.currentUser.name,
+            if (!rating) { showToast('Please select a rating.', 'error'); return; }
+
+            const newReview = {
+                user: state.currentUser.displayName,
+                userId: state.currentUser.uid,
                 rating: parseInt(rating),
                 text: text,
-                date: new Date().toISOString().slice(0, 10)
+                date: new Date()
+            };
+
+            const productRef = doc(db, 'products', productId);
+            const productSnap = await getDoc(productRef);
+            const existingReviews = productSnap.data().reviews || [];
+
+            await updateDoc(productRef, {
+                reviews: [newReview, ...existingReviews]
             });
-            renderProductDetailsPage();
+            renderProductDetailsPage(); // Re-render to show new review
             showToast('Thank you for your review!');
         }
+        window.handlePostReview = handlePostReview;
 
-        function handlePostQuestion(event, productId) {
+        async function handlePostQuestion(event, productId) {
             event.preventDefault();
             const questionText = event.target['question-text'].value;
-            const product = state.products.find(p => p.id === productId);
-            product.questions.push({
-                user: state.currentUser.name,
+            const newQuestion = {
+                user: state.currentUser.displayName,
+                userId: state.currentUser.uid,
                 question: questionText,
-                answer: null, // Admin will answer later
-                date: new Date().toISOString().slice(0, 10)
+                answer: null, 
+                date: new Date()
+            };
+            const productRef = doc(db, 'products', productId);
+            const productSnap = await getDoc(productRef);
+            const existingQuestions = productSnap.data().questions || [];
+
+            await updateDoc(productRef, {
+                questions: [...existingQuestions, newQuestion]
             });
-            renderProductDetailsPage();
+
+            renderProductDetailsPage(); // Re-render to show new question
             showToast('Your question has been submitted.');
         }
-
+        window.handlePostQuestion = handlePostQuestion;
 
         // --- USER PROFILE HANDLERS ---
-        function setProfileTab(tab) { state.profileCurrentTab = tab; renderProfilePage(); }
-        function handleUpdateProfile(event) { event.preventDefault(); state.currentUser.name = document.getElementById('profile-name').value; state.currentUser.profile.phone = document.getElementById('profile-phone').value; state.currentUser.profile.address = document.getElementById('profile-address').value; showToast('Profile updated successfully!'); updateHeaderUI(); renderProfilePage(); }
-        function handlePasswordChange(event) { event.preventDefault(); showToast('Password updated successfully!'); document.getElementById('password-change-form').reset(); }
-        function showOrderDetails(orderId) { const order = state.orders.find(o => o.id === orderId); if(!order) return; const detailsTitle = document.getElementById('order-details-title'); const detailsContent = document.getElementById('order-details-content'); detailsTitle.textContent = `Details for Order #${orderId}`; const itemsHtml = order.items.map(item => `<li>${item.name} (x${item.quantity}) - ৳${(item.price * item.quantity).toFixed(2)}</li>`).join(''); detailsContent.innerHTML = `<div><p><strong>Date:</strong> ${order.date}</p><p><strong>Status:</strong> ${order.status}</p><p><strong>Total:</strong> ৳${order.total.toFixed(2)}</p><h4 class="font-bold mt-4">Items:</h4><ul class="list-disc pl-5">${itemsHtml}</ul></div>`; showModal('order-details-modal'); }
+        window.setProfileTab = (tab) => { state.profileCurrentTab = tab; renderProfilePage(); }
+        async function handleUpdateProfile(event) { 
+            event.preventDefault(); 
+            const userRef = doc(db, "users", state.currentUser.uid);
+            await updateDoc(userRef, {
+                displayName: document.getElementById('profile-name').value,
+                "profile.phone": document.getElementById('profile-phone').value,
+                "profile.address": document.getElementById('profile-address').value
+            });
+            showToast('Profile updated successfully!'); 
+        }
+        window.handleUpdateProfile = handleUpdateProfile;
+
+        window.handlePasswordChange = (event) => { event.preventDefault(); showToast('Password updated successfully!'); document.getElementById('password-change-form').reset(); }
+        
+        async function showOrderDetails(orderId) { 
+            const orderRef = doc(db, 'orders', orderId);
+            const orderSnap = await getDoc(orderRef);
+            const order = orderSnap.data();
+
+            if(!order) return; 
+            const detailsTitle = document.getElementById('order-details-title'); 
+            const detailsContent = document.getElementById('order-details-content'); 
+            detailsTitle.textContent = `Details for Order #${orderId.substring(0,6)}`; 
+            const itemsHtml = order.items.map(item => `<li>${item.name} (x${item.quantity}) - ৳${(item.price * item.quantity).toFixed(2)}</li>`).join(''); 
+            detailsContent.innerHTML = `<div><p><strong>Date:</strong> ${new Date(order.date.seconds * 1000).toLocaleDateString()}</p><p><strong>Status:</strong> ${order.status}</p><p><strong>Total:</strong> ৳${order.total.toFixed(2)}</p><h4 class="font-bold mt-4">Items:</h4><ul class="list-disc pl-5">${itemsHtml}</ul></div>`; 
+            showModal('order-details-modal'); 
+        }
+        window.showOrderDetails = showOrderDetails;
+
+        // --- FIREBASE AUTH LISTENER ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                // User is signed in.
+                const userDocRef = doc(db, "users", user.uid);
+                let userDocSnap = await getDoc(userDocRef);
+
+                if (!userDocSnap.exists()) {
+                    // Create a new user document if it's a first-time Google sign-in
+                    await setDoc(userDocRef, {
+                        uid: user.uid,
+                        displayName: user.displayName,
+                        email: user.email,
+                        isAdmin: user.email.toLowerCase() === 'admin@kongshop.com', // Admin Check
+                        profile: { phone: '', address: ''}
+                    });
+                    userDocSnap = await getDoc(userDocRef); // Re-fetch the new doc
+                }
+
+                state.isLoggedIn = true;
+                state.currentUser = { uid: user.uid, ...userDocSnap.data() };
+                state.isAdmin = state.currentUser.isAdmin || false;
+                
+                showToast(`Welcome, ${state.currentUser.displayName}!`);
+
+            } else {
+                // User is signed out.
+                state.isLoggedIn = false;
+                state.currentUser = null;
+                state.isAdmin = false;
+                showToast('You have been logged out.');
+            }
+            updateHeaderUI();
+            handleNavigation('home');
+        });
+
+
+        // --- FIREBASE DATA LISTENERS ---
+        function setupFirestoreListeners() {
+            // Unsubscribe from old listeners if they exist
+            if (state.unsubscribeProducts) state.unsubscribeProducts();
+            if (state.unsubscribeOrders) state.unsubscribeOrders();
+
+            // Listen for product changes
+            const productsQuery = query(collection(db, "products"));
+            state.unsubscribeProducts = onSnapshot(productsQuery, (querySnapshot) => {
+                state.products = [];
+                querySnapshot.forEach((doc) => {
+                    state.products.push({ id: doc.id, ...doc.data() });
+                });
+                // Re-render if on a page that displays products
+                if (['home', 'shop', 'product', 'search', 'category'].includes(state.currentPage)) {
+                    handleNavigation(state.currentPage, state.currentProduct || state.searchQuery || state.currentCategory);
+                }
+            });
+
+            // Listen for order changes (for admin)
+            const ordersQuery = query(collection(db, "orders"));
+            state.unsubscribeOrders = onSnapshot(ordersQuery, (querySnapshot) => {
+                 state.orders = [];
+                 let income = 0, pending = 0, completed = 0, canceled = 0;
+                 querySnapshot.forEach((doc) => {
+                    const order = { id: doc.id, ...doc.data() };
+                    state.orders.push(order);
+                    // Calculate dashboard stats
+                    if (order.status === 'Completed') income += order.total;
+                    if (order.status === 'Pending') pending++;
+                    if (order.status === 'Completed') completed++;
+                    if (order.status === 'Canceled') canceled++;
+                });
+                state.dashboardStats = { income, pending, completed, canceled };
+                // Re-render if admin is viewing orders or dashboard
+                if (state.isAdmin && (state.adminCurrentTab === 'orders' || state.adminCurrentTab === 'dashboard')) {
+                    renderAdminPanel();
+                }
+            });
+        }
+
 
         // --- INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', () => {
-            state.products = mockProducts;
-            state.orders = mockOrders;
+            setupFirestoreListeners();
             handleNavigation('home');
             updateHeaderUI();
             lucide.createIcons();
             document.getElementById('footer-year').textContent = new Date().getFullYear();
+            // Assign handlers to window for inline HTML onclicks
+            window.handleNavigation = handleNavigation;
         });
 
     </script>
