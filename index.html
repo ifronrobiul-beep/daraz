@@ -214,6 +214,25 @@
         </div>
     </div>
 
+    <!-- OTP Modal -->
+    <div id="otp-modal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-8">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Enter Verification Code</h2>
+                <button onclick="hideModal('otp-modal')" class="text-gray-500 hover:text-gray-800"><i data-lucide="x" class="w-6 h-6"></i></button>
+            </div>
+            <form id="otp-form" onsubmit="handleOtpSubmit(event)">
+                <div class="space-y-4">
+                    <div>
+                        <label for="otp-input" class="block text-sm font-medium text-gray-700">A 6-digit code has been sent to your email.</label>
+                        <input type="text" id="otp-input" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" required maxlength="6">
+                    </div>
+                </div>
+                <button type="submit" class="w-full mt-6 bg-orange-500 text-white py-3 rounded-lg font-semibold hover:bg-orange-600">Verify</button>
+            </form>
+        </div>
+    </div>
+
     <!-- Signup Modal -->
     <div id="signup-modal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
         <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-8">
@@ -329,6 +348,8 @@
             dashboardStats: { income: 0, pending: 0, completed: 0, canceled: 0 },
             unsubscribeProducts: null,
             unsubscribeOrders: null,
+            otp: null,
+            pendingLoginUser: null,
         };
 
         // --- DOM ELEMENTS ---
@@ -710,7 +731,7 @@
         
         async function handleGoogleSignIn() {
             try {
-                const result = await signInWithPopup(auth, googleProvider);
+                await signInWithPopup(auth, googleProvider);
                 // The onAuthStateChanged listener will handle the rest.
                 hideModal('login-modal');
             } catch (error) {
@@ -724,15 +745,42 @@
             event.preventDefault(); 
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
-            try {
-                await signInWithEmailAndPassword(auth, email, password);
-                // onAuthStateChanged will handle UI updates
-                hideModal('login-modal');
-            } catch (error) {
-                showToast(`Login failed: ${error.message}`, 'error');
-            }
+            
+            const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+            state.otp = generatedOtp;
+            state.pendingLoginUser = { email, password };
+
+            console.log(`OTP for ${email}: ${generatedOtp}`); // Simulate sending email
+            showToast(`An OTP has been sent to ${email} (check console).`);
+
+            hideModal('login-modal');
+            showModal('otp-modal');
         }
         window.handleLogin = handleLogin;
+        
+        async function handleOtpSubmit(event) {
+            event.preventDefault();
+            const enteredOtp = document.getElementById('otp-input').value;
+
+            if (enteredOtp === state.otp) {
+                try {
+                    await signInWithEmailAndPassword(auth, state.pendingLoginUser.email, state.pendingLoginUser.password);
+                    // onAuthStateChanged will handle UI updates
+                    hideModal('otp-modal');
+                } catch (error) {
+                    showToast(`Login failed: Invalid credentials.`, 'error');
+                    hideModal('otp-modal');
+                    showModal('login-modal'); // Re-show login modal on failure
+                } finally {
+                    state.otp = null;
+                    state.pendingLoginUser = null;
+                }
+            } else {
+                showToast('Invalid OTP. Please try again.', 'error');
+            }
+        }
+        window.handleOtpSubmit = handleOtpSubmit;
+
 
         async function handleSignup(event) { 
             event.preventDefault(); 
@@ -950,11 +998,12 @@
 
                 if (!userDocSnap.exists()) {
                     // Create a new user document if it's a first-time Google sign-in
+                    const adminEmails = ['admin@kongshop.com', 'ifronrobiul@gmail.com'];
                     await setDoc(userDocRef, {
                         uid: user.uid,
                         displayName: user.displayName,
                         email: user.email,
-                        isAdmin: user.email.toLowerCase() === 'admin@kongshop.com', // Admin Check
+                        isAdmin: adminEmails.includes(user.email.toLowerCase()), // Admin Check
                         profile: { phone: '', address: ''}
                     });
                     userDocSnap = await getDoc(userDocRef); // Re-fetch the new doc
