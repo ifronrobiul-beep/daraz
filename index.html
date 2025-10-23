@@ -325,6 +325,46 @@
         </div>
     </div>
 
+     <!-- Add/Edit Address Modal -->
+     <div id="address-modal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-lg p-8">
+            <div class="flex justify-between items-center mb-6">
+                <h2 id="address-modal-title" class="text-2xl font-bold text-gray-800">Add New Address</h2>
+                <button onclick="hideModal('address-modal')" class="text-gray-500 hover:text-gray-800"><i data-lucide="x" class="w-6 h-6"></i></button>
+            </div>
+            <form id="address-form" onsubmit="handleSaveAddress(event)">
+                <input type="hidden" id="address-type"> 
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div><label for="address-name" class="block text-sm font-medium text-gray-700">Full Name</label><input type="text" id="address-name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" required></div>
+                    <div><label for="address-phone" class="block text-sm font-medium text-gray-700">Mobile Number</label><input type="tel" id="address-phone" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" required></div>
+                    <div class="md:col-span-2"><label for="address-street" class="block text-sm font-medium text-gray-700">Address</label><input type="text" id="address-street" placeholder="House no./building/street/area" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" required></div>
+                    <div><label for="address-region" class="block text-sm font-medium text-gray-700">Region</label><select id="address-region" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"><option>Dhaka</option><option>Chittagong</option><option>Sylhet</option></select></div>
+                    <div><label for="address-city" class="block text-sm font-medium text-gray-700">City</label><select id="address-city" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"><option>Dhaka</option><option>Gazipur</option><option>Narayanganj</option></select></div>
+                    <div><label for="address-area" class="block text-sm font-medium text-gray-700">Area</label><select id="address-area" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"><option>Banani</option><option>Gulshan</option><option>Dhanmondi</option></select></div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700">Address Type</label>
+                        <div class="mt-2 space-x-4">
+                             <label class="inline-flex items-center"><input type="radio" name="label" value="Home" class="form-radio text-orange-600"> <span class="ml-2">Home</span></label>
+                             <label class="inline-flex items-center"><input type="radio" name="label" value="Office" class="form-radio text-orange-600"> <span class="ml-2">Office</span></label>
+                        </div>
+                    </div>
+                     <div class="md:col-span-2 flex items-center">
+                        <input id="address-default-shipping" type="checkbox" class="h-4 w-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500">
+                        <label for="address-default-shipping" class="ml-2 block text-sm text-gray-900">Set as default shipping address</label>
+                    </div>
+                     <div class="md:col-span-2 flex items-center">
+                        <input id="address-default-billing" type="checkbox" class="h-4 w-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500">
+                        <label for="address-default-billing" class="ml-2 block text-sm text-gray-900">Set as default billing address</label>
+                    </div>
+                </div>
+                <div class="mt-8 text-right">
+                    <button type="button" onclick="hideModal('address-modal')" class="mr-2 bg-gray-200 text-gray-800 py-2 px-6 rounded-lg font-semibold hover:bg-gray-300">Cancel</button>
+                    <button type="submit" class="bg-orange-500 text-white py-2 px-6 rounded-lg font-semibold hover:bg-orange-600">Save Address</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 
     <script type="module">
         // --- REMOVED FIREBASE IMPORTS ---
@@ -358,12 +398,12 @@
         
         // --- MOCK DATA (Restored & Updated) ---
         const mockProducts = [
-             { id: 'prod1', name: 'Premium Wireless Earbuds', price: 2499, oldPrice: 3500, rating: 4.8, sold: 120, quantity: 50, image: 'https://placehold.co/400x400/F97316/FFFFFF?text=Earbuds', category: 'Electronics', discountText: '', reviews: [{user: 'Mehedi H.', rating: 5, text: 'Amazing sound quality and battery life!', date: new Date('2025-10-20')}, {user: 'Saima A.', rating: 4, text: 'Good product, connects easily.', date: new Date('2025-10-18')}], questions: [{user: 'Fahim', question: 'Is this compatible with iPhone?', answer: 'Yes, it works perfectly with all Bluetooth-enabled devices, including iPhones.', date: new Date('2025-10-19')}] },
+             { id: 'prod1', name: 'Premium Wireless Earbuds', price: 2499, oldPrice: 3500, rating: 4.8, sold: 120, quantity: 50, image: 'https://placehold.co/400x400/F97316/FFFFFF?text=Earbuds', category: 'Electronics', discountText: '', reviews: [{user: 'Mehedi H.', rating: 5, text: 'Amazing sound quality and battery life!', date: new Date('2025-10-20'), userId: 'mock_mehedi@example.com'}, {user: 'Saima A.', rating: 4, text: 'Good product, connects easily.', date: new Date('2025-10-18'), userId: 'mock_saima@example.com'}], questions: [{user: 'Fahim', question: 'Is this compatible with iPhone?', answer: 'Yes, it works perfectly with all Bluetooth-enabled devices, including iPhones.', date: new Date('2025-10-19'), userId: 'mock_fahim@example.com'}] },
             { id: 'prod2', name: 'Smart Watch with Fitness Tracker', price: 3999, oldPrice: 5000, rating: 4.5, sold: 88, quantity: 30, image: 'https://placehold.co/400x400/3B82F6/FFFFFF?text=Watch', category: 'Electronics', discountText: '20% OFF', reviews: [], questions: [] }, 
-            { id: 'prod3', name: 'Gaming Mouse with RGB', price: 1500, oldPrice: 2200, rating: 4.7, sold: 150, quantity: 100, image: 'https://placehold.co/400x400/EF4444/FFFFFF?text=Mouse', category: 'Electronics', discountText: '', reviews: [{user: 'GamerGuy', rating: 5, text: 'Best mouse for the price!', date: new Date('2025-09-15')}], questions: [{user: 'Newbie', question: 'Can I change the RGB colors?', answer: 'Yes, it comes with software to customize the lighting effects.', date: new Date('2025-09-12')}] },
+            { id: 'prod3', name: 'Gaming Mouse with RGB', price: 1500, oldPrice: 2200, rating: 4.7, sold: 150, quantity: 100, image: 'https://placehold.co/400x400/EF4444/FFFFFF?text=Mouse', category: 'Electronics', discountText: '', reviews: [{user: 'GamerGuy', rating: 5, text: 'Best mouse for the price!', date: new Date('2025-09-15'), userId: 'mock_gamer@example.com'}], questions: [{user: 'Newbie', question: 'Can I change the RGB colors?', answer: 'Yes, it comes with software to customize the lighting effects.', date: new Date('2025-09-12'), userId: 'mock_newbie@example.com'}] },
             { id: 'prod4', name: '4K Action Camera', price: 8500, oldPrice: 11000, rating: 4.6, sold: 45, quantity: 25, image: 'https://placehold.co/400x400/22C55E/FFFFFF?text=Camera', category: 'Electronics', discountText: '', reviews: [], questions: [] },
             { id: 'prod5', name: 'Portable Bluetooth Speaker', price: 2200, oldPrice: 3000, rating: 4.9, sold: 200, quantity: 80, image: 'https://placehold.co/400x400/8B5CF6/FFFFFF?text=Speaker', category: 'Electronics', discountText: '', reviews: [], questions: [] },
-            { id: 'prod6', name: 'Men\'s Casual Cotton Shirt', price: 850, oldPrice: 1200, rating: 4.2, sold: 250, quantity: 150, image: 'https://placehold.co/400x400/10B981/FFFFFF?text=Shirt', category: 'Fashion', discountText: '', reviews: [{user: 'Rina', rating: 5, text: 'Fabric is very comfortable.', date: new Date('2025-10-05')}], questions: [{user: 'Kamal', question: 'What is the return policy?', answer: 'We have a 7-day return policy for this item.', date: new Date('2025-10-06')}] },
+            { id: 'prod6', name: 'Men\'s Casual Cotton Shirt', price: 850, oldPrice: 1200, rating: 4.2, sold: 250, quantity: 150, image: 'https://placehold.co/400x400/10B981/FFFFFF?text=Shirt', category: 'Fashion', discountText: '', reviews: [{user: 'Rina', rating: 5, text: 'Fabric is very comfortable.', date: new Date('2025-10-05'), userId: 'mock_rina@example.com'}], questions: [{user: 'Kamal', question: 'What is the return policy?', answer: 'We have a 7-day return policy for this item.', date: new Date('2025-10-06'), userId: 'mock_kamal@example.com'}] },
             { id: 'prod7', name: 'Women\'s Stylish Handbag', price: 1800, oldPrice: 2500, rating: 4.6, sold: 95, quantity: 60, image: 'https://placehold.co/400x400/EC4899/FFFFFF?text=Handbag', category: 'Fashion', discountText: '', reviews: [], questions: [] },
             { id: 'prod8', name: 'Leather Wallet for Men', price: 600, oldPrice: 900, rating: 4.4, sold: 400, quantity: 200, image: 'https://placehold.co/400x400/F59E0B/FFFFFF?text=Wallet', category: 'Fashion', discountText: '', reviews: [], questions: [] },
             { id: 'prod9', name: 'Classic Aviator Sunglasses', price: 1200, oldPrice: 1800, rating: 4.7, sold: 180, quantity: 75, image: 'https://placehold.co/400x400/06B6D4/FFFFFF?text=Sunglasses', category: 'Fashion', discountText: 'Sale', reviews: [], questions: [] }, 
@@ -622,7 +662,7 @@
                 case 'categories': content = renderAdminCategories(); break; 
                 case 'content': content = renderAdminSiteContent(); break; // New Case
             } 
-            mainContent.innerHTML = `<div class="bg-white p-6 rounded-lg shadow-lg"><h2 class="text-3xl font-bold mb-4">Admin Panel</h2><div class="border-b border-gray-200"><nav class="-mb-px flex space-x-6" aria-label="Tabs">
+            mainContent.innerHTML = `<div class="bg-white p-6 rounded-lg shadow-lg"><h2 class="text-3xl font-bold mb-4">Admin Panel</h2><div class="border-b border-gray-200"><nav class="-mb-px flex space-x-6 overflow-x-auto pb-px" aria-label="Tabs">
             <button onclick="window.setAdminTab('dashboard')" class="admin-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${state.adminCurrentTab === 'dashboard' ? 'active' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}">Dashboard</button>
             <button onclick="window.setAdminTab('orders')" class="admin-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${state.adminCurrentTab === 'orders' ? 'active' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}">Orders</button>
             <button onclick="window.setAdminTab('products')" class="admin-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${state.adminCurrentTab === 'products' ? 'active' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}">Products</button>
@@ -755,6 +795,7 @@
                             <div>
                                 <h3 class="font-semibold text-gray-800 mb-2">Manage My Account</h3>
                                 <nav class="flex flex-col space-y-1">
+                                     {/* Highlight My Profile if current tab is 'manage' or 'profile' */}
                                     <a href="#" onclick="window.setProfileTab('profile')" class="profile-sidebar-link ${['manage', 'profile'].includes(state.profileCurrentTab) ? 'active' : ''}">My Profile</a>
                                     <a href="#" onclick="window.setProfileTab('address')" class="profile-sidebar-link ${state.profileCurrentTab === 'address' ? 'active' : ''}">Address Book</a>
                                     <a href="#" onclick="window.setProfileTab('payment')" class="profile-sidebar-link ${state.profileCurrentTab === 'payment' ? 'active' : ''}">My Payment Options</a>
@@ -810,23 +851,23 @@
                     <div>
                         <div class="flex justify-between items-center mb-4">
                             <h3 class="text-lg font-semibold text-gray-700">Address Book</h3>
-                            <button onclick="window.addAddress('shipping')" class="text-sm text-blue-600 hover:underline flex items-center"><i data-lucide="plus" class="w-4 h-4 mr-1"></i>Add</button>
+                            <button onclick="window.openAddressModal('shipping', false)" class="text-sm text-blue-600 hover:underline flex items-center"><i data-lucide="plus" class="w-4 h-4 mr-1"></i>Add</button>
                         </div>
                         <div class="grid grid-cols-1 gap-4">
                             <div class="border p-4 rounded-md">
-                                <h4 class="font-medium text-gray-800 mb-2">Shipping Address</h4>
+                                <h4 class="font-medium text-gray-800 mb-1">Default Shipping Address</h4>
                                 ${user.profile?.address ? 
                                     `<p class="text-sm text-gray-600">${user.profile.address.replace(/\n/g, '<br>')}</p> 
-                                    <button onclick="window.addAddress('shipping')" class="text-xs text-blue-500 hover:underline mt-1">Edit</button>` : 
-                                    `<p class="text-sm text-gray-500">Save your shipping address here.</p>`
+                                    <button onclick="window.openAddressModal('shipping', true)" class="text-xs text-blue-500 hover:underline mt-1">Edit Address</button>` : 
+                                    `<p class="text-sm text-gray-500">You have not set a default shipping address.</p>`
                                 }
                             </div>
                              <div class="border p-4 rounded-md">
-                                <h4 class="font-medium text-gray-800 mb-2">Billing Address</h4>
+                                <h4 class="font-medium text-gray-800 mb-1">Default Billing Address</h4>
                                 ${user.profile?.billingAddress ? 
                                     `<p class="text-sm text-gray-600">${user.profile.billingAddress.replace(/\n/g, '<br>')}</p>
-                                    <button onclick="window.addAddress('billing')" class="text-xs text-blue-500 hover:underline mt-1">Edit</button>` : 
-                                    `<p class="text-sm text-gray-500">Save your billing address here.</p>`
+                                    <button onclick="window.openAddressModal('billing', true)" class="text-xs text-blue-500 hover:underline mt-1">Edit Address</button>` : 
+                                    `<p class="text-sm text-gray-500">You have not set a default billing address.</p>`
                                 }
                              </div>
                         </div>
@@ -835,15 +876,179 @@
              `;
         }
 
-        // --- Placeholder render functions for new sidebar items ---
-        function renderAddressBookView() { return `<h3 class="text-xl font-semibold mb-4">Address Book</h3><p>Manage your shipping and billing addresses here. (Coming Soon)</p>`; }
-        function renderPaymentOptionsView() { return `<h3 class="text-xl font-semibold mb-4">My Payment Options</h3><p>Manage your saved cards and payment methods. (Coming Soon)</p>`; }
-        function renderWalletView() { return `<h3 class="text-xl font-semibold mb-4">KongShop Wallet</h3><p>View your wallet balance and transaction history. (Coming Soon)</p>`; }
-        function renderReturnsView() { return `<h3 class="text-xl font-semibold mb-4">My Returns</h3><p>View your return requests and status. (Coming Soon)</p>`; }
-        function renderCancellationsView() { return `<h3 class="text-xl font-semibold mb-4">My Cancellations</h3><p>View your cancelled orders. (Coming Soon)</p>`; }
-        function renderReviewsView() { return `<h3 class="text-xl font-semibold mb-4">My Reviews</h3><p>Manage the reviews you have submitted. (Coming Soon)</p>`; }
-        function renderWishlistView() { return `<h3 class="text-xl font-semibold mb-4">My Wishlist & Followed Stores</h3><p>View your saved items and favorite stores. (Coming Soon)</p>`; }
-        function renderSellOnKongShopView() { return `<h3 class="text-xl font-semibold mb-4">Sell On KongShop</h3><p>Information about becoming a seller. (Coming Soon)</p>`; }
+        // --- New render functions for profile sections ---
+        function renderAddressBookView() { 
+            const user = state.currentUser;
+            const hasShipping = user.profile?.address;
+            const hasBilling = user.profile?.billingAddress;
+
+             return `
+                <div class="flex justify-end mb-4">
+                    <button onclick="window.openAddressModal(null, false)" class="bg-orange-500 text-white py-2 px-4 rounded-lg text-sm font-semibold hover:bg-orange-600 flex items-center space-x-1">
+                        <i data-lucide="plus" class="w-4 h-4"></i><span>Add New Address</span>
+                    </button>
+                </div>
+                 <div class="space-y-4">
+                     <div class="border p-4 rounded-md bg-gray-50">
+                         <div class="flex justify-between items-center mb-2">
+                             <h4 class="font-semibold text-gray-800">Shipping Address ${hasShipping ? '<span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full ml-2">Default</span>' : ''}</h4>
+                              <button onclick="window.openAddressModal('shipping', ${hasShipping})" class="text-sm text-blue-600 hover:underline">${hasShipping ? 'Edit' : 'Add'}</button>
+                         </div>
+                         ${hasShipping ? `<p class="text-sm text-gray-600">${user.profile.address.replace(/\n/g, '<br>')}</p>` : '<p class="text-sm text-gray-500">No default shipping address set.</p>'}
+                     </div>
+                      <div class="border p-4 rounded-md bg-gray-50">
+                          <div class="flex justify-between items-center mb-2">
+                             <h4 class="font-semibold text-gray-800">Billing Address ${hasBilling ? '<span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full ml-2">Default</span>' : ''}</h4>
+                              <button onclick="window.openAddressModal('billing', ${hasBilling})" class="text-sm text-blue-600 hover:underline">${hasBilling ? 'Edit' : 'Add'}</button>
+                         </div>
+                         ${hasBilling ? `<p class="text-sm text-gray-600">${user.profile.billingAddress.replace(/\n/g, '<br>')}</p>` : '<p class="text-sm text-gray-500">No default billing address set.</p>'}
+                     </div>
+                     {/* Add loop here for additional addresses if needed */}
+                 </div>
+            `; 
+        }
+
+        function renderPaymentOptionsView() { 
+            // Mock data - replace with actual data if storing payment info (NOT RECOMMENDED without proper security)
+            const mockPayments = [
+                 { type: 'Visa', details: '**** **** **** 1234', default: true },
+                 { type: 'bKash', details: '017***1234', default: false },
+            ];
+             const paymentHtml = mockPayments.map(p => `
+                 <div class="border p-4 rounded-md flex justify-between items-center">
+                     <div>
+                         <p class="font-medium">${p.type} ${p.default ? '<span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full ml-2">Default</span>' : ''}</p>
+                         <p class="text-sm text-gray-500">${p.details}</p>
+                     </div>
+                     <div>
+                         ${!p.default ? '<button class="text-xs text-blue-500 hover:underline mr-2">Set as Default</button>' : ''}
+                         <button class="text-xs text-red-500 hover:underline">Remove</button>
+                     </div>
+                 </div>
+             `).join('');
+
+            return `
+                 <div class="flex justify-end mb-4">
+                     <button onclick="showToast('Add Payment Simulation', 'info')" class="bg-orange-500 text-white py-2 px-4 rounded-lg text-sm font-semibold hover:bg-orange-600 flex items-center space-x-1">
+                        <i data-lucide="plus" class="w-4 h-4"></i><span>Add Payment Method</span>
+                    </button>
+                 </div>
+                 <div class="space-y-4">
+                     ${paymentHtml}
+                 </div>
+             `; 
+        }
+
+        function renderWalletView() { 
+             const mockBalance = 500.00;
+             const mockTransactions = [
+                 { date: new Date('2025-10-20'), description: 'Refund Order #103', amount: 150.00, type: 'credit' },
+                 { date: new Date('2025-10-15'), description: 'Top-up via bKash', amount: 500.00, type: 'credit' },
+                 { date: new Date('2025-10-12'), description: 'Payment Order #101', amount: -3349.00, type: 'debit' },
+             ];
+             const transactionHtml = mockTransactions.map(t => `
+                 <tr class="hover:bg-gray-50">
+                     <td class="px-4 py-3 text-sm">${t.date.toLocaleDateString()}</td>
+                     <td class="px-4 py-3 text-sm">${t.description}</td>
+                     <td class="px-4 py-3 text-sm text-right ${t.type === 'credit' ? 'text-green-600' : 'text-red-600'}">
+                         ${t.type === 'credit' ? '+' : '-'} ৳${Math.abs(t.amount).toFixed(2)}
+                     </td>
+                 </tr>
+             `).join('');
+
+             return `
+                 <div class="mb-6">
+                     <p class="text-lg text-gray-600">Current Balance:</p>
+                     <p class="text-4xl font-bold text-orange-600">৳${mockBalance.toFixed(2)}</p>
+                 </div>
+                 <div class="border-t pt-6">
+                     <h4 class="font-semibold text-lg mb-3">Transaction History</h4>
+                     <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y">
+                            <thead><tr><th class="px-4 py-2 text-left">Date</th><th class="px-4 py-2 text-left">Description</th><th class="px-4 py-2 text-right">Amount</th></tr></thead>
+                            <tbody>${transactionHtml}</tbody>
+                        </table>
+                    </div>
+                 </div>
+             `; 
+        }
+
+        function renderReturnsView() { 
+            const mockReturns = [
+                 { orderId: 'order101', item: 'Men\'s Casual Shirt', status: 'Processing', date: new Date('2025-10-22') },
+                 { orderId: 'order098', item: 'Wireless Earbuds', status: 'Refunded', date: new Date('2025-10-18') },
+            ];
+             const returnsHtml = mockReturns.map(r => `
+                 <tr class="hover:bg-gray-50">
+                     <td class="px-4 py-3 text-sm">#${r.orderId.substring(5,11)}</td>
+                     <td class="px-4 py-3 text-sm">${r.item}</td>
+                     <td class="px-4 py-3 text-sm">${r.date.toLocaleDateString()}</td>
+                     <td class="px-4 py-3 text-sm"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${r.status === 'Processing' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}">${r.status}</span></td>
+                 </tr>
+             `).join('');
+
+             return `
+                  <div class="flex justify-end mb-4">
+                     <button onclick="showToast('Return Request Simulation', 'info')" class="bg-orange-500 text-white py-2 px-4 rounded-lg text-sm font-semibold hover:bg-orange-600 flex items-center space-x-1">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i><span>Request Return</span>
+                    </button>
+                 </div>
+                 <div class="overflow-x-auto">
+                     <table class="min-w-full divide-y">
+                         <thead><tr><th class="px-4 py-2 text-left">Order ID</th><th class="px-4 py-2 text-left">Item</th><th class="px-4 py-2 text-left">Request Date</th><th class="px-4 py-2 text-left">Status</th></tr></thead>
+                         <tbody>${returnsHtml}</tbody>
+                     </table>
+                 </div>
+             `; 
+        }
+        function renderCancellationsView() { 
+            const cancelledOrders = state.orders.filter(o => o.userId === state.currentUser.uid && o.status === 'Canceled');
+            if (cancelledOrders.length === 0) return `<p>You have no cancelled orders.</p>`;
+
+             const ordersHtml = cancelledOrders.map(order => `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3 text-sm font-medium">#${order.id.substring(5,11)}</td>
+                    <td class="px-4 py-3 text-sm">${order.date.toLocaleDateString()}</td>
+                    <td class="px-4 py-3 text-sm">৳${order.total.toFixed(2)}</td>
+                     <td class="px-4 py-3 text-sm text-right"><button onclick="window.showOrderDetails('${order.id}')" class="text-indigo-600 hover:text-indigo-900">View Details</button></td>
+                </tr>`).join('');
+            return `<div class="overflow-x-auto"><table class="min-w-full divide-y"><thead><tr><th class="px-4 py-2 text-left">Order ID</th><th class="px-4 py-2 text-left">Date Canceled</th><th class="px-4 py-2 text-left">Total</th><th></th></tr></thead><tbody>${ordersHtml}</tbody></table></div>`;
+        }
+
+         function renderReviewsView() { 
+             const userReviews = [];
+             state.products.forEach(product => {
+                 if (product.reviews && product.reviews.length > 0) {
+                     product.reviews.forEach(review => {
+                         if (review.userId === state.currentUser.uid) {
+                             userReviews.push({ ...review, productName: product.name, productId: product.id });
+                         }
+                     });
+                 }
+             });
+
+             if (userReviews.length === 0) return `<p>You have not submitted any reviews yet.</p>`;
+
+             const reviewsHtml = userReviews.map(review => `
+                 <div class="border-t py-4">
+                     <div class="flex justify-between items-start">
+                        <div>
+                             <p class="font-semibold text-gray-800 mb-1">
+                                <a href="#" onclick="window.handleNavigation('product', '${review.productId}')" class="hover:underline hover:text-orange-600">${review.productName}</a>
+                             </p>
+                             <div class="flex text-yellow-400 mb-1">${'<i data-lucide="star" class="w-4 h-4 fill-current"></i>'.repeat(review.rating)}</div>
+                            <p class="text-gray-600 text-sm">${review.text}</p>
+                            <p class="text-xs text-gray-400 mt-1">${review.date.toLocaleDateString()}</p>
+                        </div>
+                         <button onclick="showToast('Edit Review - Coming Soon!', 'info')" class="text-xs text-blue-500 hover:underline">Edit</button> {/* Placeholder Edit */}
+                     </div>
+                 </div>
+             `).join('');
+
+             return `<div class="space-y-4">${reviewsHtml}</div>`; 
+         }
+        function renderWishlistView() { return `<p>Your wishlist and followed stores will appear here. (Coming Soon)</p>`; }
+        function renderSellOnKongShopView() { return `<p>Interested in selling on KongShop? Contact us for more details. (Coming Soon)</p>`; }
 
 
         // --- Updated/Kept functions ---
@@ -860,6 +1065,9 @@
                              <input id="profile-marketing-full" type="checkbox" ${user.profile?.marketingEmails ? 'checked' : ''} class="h-4 w-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500">
                              <label for="profile-marketing-full" class="ml-2 block text-sm text-gray-900">Receive marketing emails</label>
                          </div>
+                     </div>
+                     <div class="mt-6 border-t pt-6">
+                         ${renderProfileSettings()} {/* Embed password change here */}
                      </div>
                      <div class="text-right mt-6">
                           <button type="submit" class="bg-orange-500 text-white py-2 px-6 rounded-lg font-semibold hover:bg-orange-600">Save Changes</button>
@@ -881,20 +1089,7 @@
                 </tr>`).join('');
             return `<div class="overflow-x-auto"><table class="min-w-full divide-y"><thead><tr><th class="px-4 py-2 text-left">Order ID</th><th class="px-4 py-2 text-left">Date</th><th class="px-4 py-2 text-left">Total</th><th class="px-4 py-2 text-left">Status</th><th></th></tr></thead><tbody>${ordersHtml}</tbody></table></div>`;
         }
-        function renderProfileSettings() { // Now possibly part of 'My Profile' or redundant
-            return `
-                <form id="password-change-form" onsubmit="window.handlePasswordChange(event)">
-                    <div class="space-y-4 max-w-md">
-                        <h3 class="text-lg font-medium">Change Password</h3>
-                        <div><label class="block text-sm font-medium text-gray-700">Current Password</label><input type="password" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required></div>
-                        <div><label class="block text-sm font-medium text-gray-700">New Password</label><input type="password" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required></div>
-                        <div><label class="block text-sm font-medium text-gray-700">Confirm New Password</label><input type="password" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required></div>
-                    </div>
-                    <div class="text-left mt-6"><button type="submit" class="bg-orange-500 text-white py-2 px-6 rounded-lg font-semibold hover:bg-orange-600">Update Password</button></div>
-                </form>
-            `;
-        }
-
+        
         // --- GLOBAL EVENT HANDLERS & LOGIC ---
         function updateCartCount() { const cartCountEl = document.getElementById('cart-count'); if (cartCountEl) { cartCountEl.textContent = state.cart.reduce((sum, item) => sum + item.quantity, 0); } }
         function showToast(message, type = 'success') { toastElement.textContent = message; toastElement.className = `fixed bottom-5 right-5 text-white py-2 px-4 rounded-lg shadow-lg transform transition-transform duration-300 z-50 ${type === 'success' ? 'bg-green-500' : 'bg-red-500'}`; toastElement.classList.remove('translate-x-[120%]'); setTimeout(() => { toastElement.classList.add('translate-x-[120%]'); }, 3000); }
@@ -1427,13 +1622,89 @@
              }
         };
 
-        // Placeholder for adding/editing address - would open another modal
-        window.addAddress = (type) => {
-            showToast(`${type === 'shipping' ? 'Shipping' : 'Billing'} address management coming soon!`, 'info');
-            // In a full implementation, this would open a form modal
-            // to add/edit address details, similar to the edit profile modal.
-            // Example: openAddressModal(type);
+        // Address Modal Logic
+        window.openAddressModal = (type, isEditing) => {
+             const modalTitle = document.getElementById('address-modal-title');
+             const form = document.getElementById('address-form');
+             form.reset(); // Clear previous data
+
+             const addressTypeInput = document.getElementById('address-type');
+             addressTypeInput.value = type || 'shipping'; // Default to shipping if adding new
+
+             modalTitle.textContent = `${isEditing ? 'Edit' : 'Add'} ${type === 'billing' ? 'Billing' : 'Shipping'} Address`;
+
+             const user = state.currentUser;
+             const addressKey = type === 'billing' ? 'billingAddress' : 'address';
+             const defaultKey = type === 'billing' ? 'defaultBilling' : 'defaultShipping';
+
+             if (isEditing && user.profile && user.profile[addressKey]) {
+                 // Pre-fill form for editing (simple example, needs improvement for structured address)
+                  const fullAddress = user.profile[addressKey];
+                  // Attempt to split address - This is a basic split, might need refinement
+                  const parts = fullAddress.split(','); 
+                  document.getElementById('address-street').value = parts[0]?.trim() || '';
+                  document.getElementById('address-area').value = parts[1]?.trim() || ''; // Assuming Area is second
+                  document.getElementById('address-city').value = parts[2]?.trim() || ''; // Assuming City is third
+                  document.getElementById('address-region').value = parts[3]?.trim() || ''; // Assuming Region is fourth
+
+                 document.getElementById('address-name').value = user.displayName; // Use profile name as default
+                 document.getElementById('address-phone').value = user.profile.phone || ''; // Use profile phone
+                 document.getElementById('address-default-shipping').checked = user.profile.defaultShipping || false;
+                 document.getElementById('address-default-billing').checked = user.profile.defaultBilling || false;
+
+                 // Select radio based on address label (if stored)
+                 const label = user.profile[`${type}AddressLabel`] || '';
+                 const labelRadio = form.querySelector(`input[name="label"][value="${label}"]`);
+                 if (labelRadio) labelRadio.checked = true;
+
+             } else {
+                 // Set defaults for adding new
+                 document.getElementById('address-name').value = user.displayName;
+                 document.getElementById('address-phone').value = user.profile?.phone || '';
+                 document.getElementById('address-default-shipping').checked = !user.profile?.address; // Default if no shipping exists
+                 document.getElementById('address-default-billing').checked = !user.profile?.billingAddress; // Default if no billing exists
+
+             }
+
+             showModal('address-modal');
         }
+
+         window.handleSaveAddress = (event) => {
+             event.preventDefault();
+             const type = document.getElementById('address-type').value; // 'shipping' or 'billing'
+             const addressKey = type === 'billing' ? 'billingAddress' : 'address';
+             const defaultShipping = document.getElementById('address-default-shipping').checked;
+             const defaultBilling = document.getElementById('address-default-billing').checked;
+             const label = document.querySelector('input[name="label"]:checked')?.value || '';
+
+             // Construct address string (simple example)
+             const street = document.getElementById('address-street').value;
+             const area = document.getElementById('address-area').value;
+             const city = document.getElementById('address-city').value;
+             const region = document.getElementById('address-region').value;
+             const fullAddress = `${street}\n${area}, ${city}\n${region}`; // Store with newlines
+
+              if (!state.currentUser.profile) {
+                 state.currentUser.profile = {}; // Initialize profile if it doesn't exist
+             }
+
+             state.currentUser.profile[addressKey] = fullAddress;
+             state.currentUser.profile[`${type}AddressLabel`] = label; // Store label like shippingAddressLabel
+
+             // Handle default flags - ensure only one default of each type
+             if (defaultShipping) state.currentUser.profile.defaultShipping = true;
+             if (defaultBilling) state.currentUser.profile.defaultBilling = true;
+             // In a real app, you might need to unset other defaults if a new one is set
+
+             // Update phone number if it was potentially edited here
+             state.currentUser.profile.phone = document.getElementById('address-phone').value;
+
+
+             showToast('Address saved successfully!');
+             hideModal('address-modal');
+             renderProfilePage(); // Re-render the profile page to show the updated address
+         }
+
 
         window.handlePasswordChange = (event) => { event.preventDefault(); showToast('Password updated successfully!'); document.getElementById('password-change-form').reset(); }
         
