@@ -49,10 +49,27 @@
             transition: opacity 0.3s ease;
         }
         .admin-tab.active, .profile-tab.active {
-            border-color: #f97316;
+            /* border-color: #f97316; */
             color: #f97316;
-            background-color: #fff7ed;
+            /* background-color: #fff7ed; */
+             font-weight: 600;
         }
+         .profile-sidebar-link {
+            display: block;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            color: #4b5563; /* text-gray-600 */
+            transition: background-color 0.2s, color 0.2s;
+         }
+         .profile-sidebar-link:hover {
+            background-color: #f3f4f6; /* bg-gray-100 */
+         }
+         .profile-sidebar-link.active {
+            color: #f97316; /* text-orange-500 */
+            font-weight: 600; /* font-semibold */
+         }
+
         /* Star Rating Styles */
         .rating-input-group {
             display: inline-flex;
@@ -72,6 +89,7 @@
         .rating-input-group label:hover ~ label {
             color: #f59e0b; /* amber-500 */
         }
+        .prose p { margin-bottom: 1em; } /* Basic prose styling */
 
     </style>
 </head>
@@ -180,24 +198,28 @@
     <div id="login-modal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
         <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-8">
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold text-gray-800">Login or Sign Up</h2>
+                <h2 class="text-2xl font-bold text-gray-800">Login</h2>
                 <button onclick="hideModal('login-modal')" class="text-gray-500 hover:text-gray-800"><i data-lucide="x" class="w-6 h-6"></i></button>
             </div>
-            <div>
-                <p class="text-center text-gray-600 mb-6">Continue with Google for a seamless and secure experience.</p>
-                <button type="button" onclick="handleGoogleSignIn()" class="w-full bg-white border border-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-50 flex items-center justify-center">
-                    <svg class="w-5 h-5 mr-2" viewBox="0 0 48 48"><path fill="#4285F4" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l8.35 6.48C12.73 13.72 17.95 9.5 24 9.5z"></path><path fill="#34A853" d="M46.98 24.55c0-1.57-.15-3.09-.42-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6.02C43.51 37.63 46.98 31.76 46.98 24.55z"></path><path fill="#FBBC05" d="M10.91 28.74c-.52-1.57-.82-3.24-.82-4.94s.3-3.37.82-4.94l-8.35-6.48C.73 16.31 0 20.05 0 24c0 3.95.73 7.69 2.56 11.22l8.35-6.48z"></path><path fill="#EA4335" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6.02c-2.11 1.44-4.78 2.28-7.96 2.28-6.04 0-11.26-4.22-13.09-9.98l-8.35 6.48C6.51 42.62 14.62 48 24 48z"></path><path fill="none" d="M0 0h48v48H0z"></path></svg>
-                    Sign in with Google
-                </button>
-                 <div class="my-4 flex items-center">
-                    <div class="flex-grow border-t border-gray-300"></div>
-                    <span class="flex-shrink mx-4 text-gray-500 text-sm">OR</span>
-                    <div class="flex-grow border-t border-gray-300"></div>
+            <form id="login-form" onsubmit="handleLogin(event)">
+                 <div class="space-y-4">
+                    <div>
+                        <label for="login-email" class="block text-sm font-medium text-gray-700">Email Address</label>
+                        <input type="email" id="login-email" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" required>
+                    </div>
+                    <div class="relative">
+                        <label for="login-password" class="block text-sm font-medium text-gray-700">Password</label>
+                        <input type="password" id="login-password" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" required>
+                        <button type="button" onclick="togglePasswordVisibility('login-password')" class="absolute inset-y-0 right-0 top-6 pr-3 flex items-center text-sm leading-5">
+                            <i class="h-5 w-5 text-gray-500" data-lucide="eye"></i>
+                        </button>
+                    </div>
                 </div>
-                 <p class="text-sm text-center text-gray-600">
-                    Need an account? <a href="#" onclick="showModal('signup-modal'); hideModal('login-modal');" class="font-medium text-orange-600 hover:text-orange-500">Create one now</a>
+                <button type="submit" class="w-full mt-6 bg-orange-500 text-white py-3 rounded-lg font-semibold hover:bg-orange-600">Login</button>
+                 <p class="text-sm text-center mt-4 text-gray-600">
+                    Don't have an account? <a href="#" onclick="showModal('signup-modal'); hideModal('login-modal');" class="font-medium text-orange-600 hover:text-orange-500">Sign up</a>
                 </p>
-            </div>
+            </form>
         </div>
     </div>
 
@@ -246,9 +268,11 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div><label for="product-name" class="block text-sm font-medium text-gray-700">Product Name</label><input type="text" id="product-name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" required></div>
                     <div><label for="product-category" class="block text-sm font-medium text-gray-700">Category</label><select id="product-category" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" required></select></div>
-                    <div><label for="product-price" class="block text-sm font-medium text-gray-700">Price (৳)</label><input type="number" id="product-price" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" required></div>
-                    <div><label for="product-old-price" class="block text-sm font-medium text-gray-700">Old Price (৳)</label><input type="number" id="product-old-price" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"></div>
-                    <div class="md:col-span-2">
+                    <div><label for="product-price" class="block text-sm font-medium text-gray-700">Price (৳)</label><input type="number" id="product-price" step="0.01" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" required></div>
+                    <div><label for="product-old-price" class="block text-sm font-medium text-gray-700">Old Price (৳)</label><input type="number" id="product-old-price" step="0.01" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"></div>
+                     <div><label for="product-discount-text" class="block text-sm font-medium text-gray-700">Discount Text (Optional)</label><input type="text" id="product-discount-text" placeholder="e.g., 30% OFF, Special" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"></div>
+                     <!-- Span makes image upload take full width -->
+                    <div class="md:col-span-2"> 
                         <label for="product-image-upload" class="block text-sm font-medium text-gray-700">Product Image</label>
                         <div class="mt-1 flex items-center space-x-4">
                             <img id="product-image-preview" src="https://placehold.co/100x100/F5F5F5/CCC?text=Preview" class="w-24 h-24 object-cover rounded-md bg-gray-100">
@@ -276,46 +300,88 @@
         </div>
     </div>
 
+     <!-- Edit Profile Modal -->
+    <div id="edit-profile-modal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-8">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Edit Profile</h2>
+                <button onclick="hideModal('edit-profile-modal')" class="text-gray-500 hover:text-gray-800"><i data-lucide="x" class="w-6 h-6"></i></button>
+            </div>
+            <form id="profile-edit-form" onsubmit="handleUpdateProfile(event)">
+                <div class="space-y-4">
+                    <div><label class="block text-sm font-medium text-gray-700">Full Name</label><input type="text" id="profile-name-edit" value="" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" required></div>
+                    <div><label class="block text-sm font-medium text-gray-700">Email</label><input type="email" id="profile-email-edit" value="" class="mt-1 block w-full rounded-md border-gray-300 bg-gray-100 shadow-sm" disabled></div>
+                     <div class="flex items-center">
+                        <input id="profile-marketing-edit" type="checkbox" class="h-4 w-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500">
+                        <label for="profile-marketing-edit" class="ml-2 block text-sm text-gray-900">Receive marketing emails</label>
+                    </div>
+                </div>
+                <div class="text-right mt-6">
+                    <button type="button" onclick="hideModal('edit-profile-modal')" class="mr-2 bg-gray-200 text-gray-800 py-2 px-6 rounded-lg font-semibold hover:bg-gray-300">Cancel</button>
+                    <button type="submit" class="bg-orange-500 text-white py-2 px-6 rounded-lg font-semibold hover:bg-orange-600">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
     <script type="module">
-        // --- FIREBASE IMPORTS ---
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, onSnapshot, collection, query } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-        // --- FIREBASE CONFIG & INITIALIZATION ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyAclLzOuXJgn1cWP14INAlt0CvC3rlBLGI",
-            authDomain: "kongshop-eaaca.firebaseapp.com",
-            projectId: "kongshop-eaaca",
-            storageBucket: "kongshop-eaaca.appspot.com",
-            messagingSenderId: "921065056453",
-            appId: "1:921065056453:web:0e65648946d40cabade8ac"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const googleProvider = new GoogleAuthProvider();
+        // --- REMOVED FIREBASE IMPORTS ---
 
         // --- STATE MANAGEMENT ---
         const state = {
-            products: [],
+            products: [], // Will be populated with mock data
             cart: [],
-            orders: [],
+            orders: [], // Will be populated with mock data
             categories: ['Electronics', 'Fashion', 'Home & Kitchen', 'Health & Beauty'],
             currentPage: 'home',
             currentProduct: null,
             searchQuery: '',
             currentCategory: null,
             isLoggedIn: false,
-            currentUser: null, // Will store Firebase user object
+            currentUser: null, // Will store mock user object {uid, displayName, email, isAdmin, profile}
             isAdmin: false,
             adminCurrentTab: 'dashboard',
-            profileCurrentTab: 'profile',
+            profileCurrentTab: 'manage', // Default to manage account view
             dashboardStats: { income: 0, pending: 0, completed: 0, canceled: 0 },
-            unsubscribeProducts: null,
-            unsubscribeOrders: null,
+            bannerImageUrl: 'https://placehold.co/1200x400/FEF2F2/F97316?text=Biggest+Sale+of+The+Year!', // Default Banner
+            pageContent: { // Content for static pages
+                about: `<h2>About KongShop</h2><p>Welcome to KongShop, a project dedicated to demonstrating a modern e-commerce platform. Our mission is to provide an exceptional online shopping experience, offering a wide range of products from trusted sellers, all in one convenient place.</p><p>We believe in the power of technology to connect people and businesses, fostering a community of buyers and sellers built on trust and quality. This clone is built with modern web technologies to be fast, responsive, and user-friendly across all devices.</p><h3>Our Vision</h3><p>To be the number one e-commerce project demonstration, showcasing the potential of clean code, intuitive design, and robust functionality. We aim to inspire developers and provide a learning platform for building complex, single-page applications.</p>`,
+                howToBuy: `<h2 class="text-center">How to Buy: 5 Easy Steps</h2><div class="mt-8 grid grid-cols-1 md:grid-cols-5 gap-8 text-center relative"><div class="hidden md:block absolute top-1/2 left-0 w-full h-0.5 bg-gray-200" style="transform: translateY(-50%); z-index: 0;"></div><div class="relative z-10 flex flex-col items-center"><div class="bg-orange-100 text-orange-600 rounded-full w-20 h-20 flex items-center justify-center border-4 border-white shadow"><i data-lucide="search" class="w-10 h-10"></i></div><h3 class="mt-4 font-bold">1. Find Your Product</h3><p class="text-sm text-gray-600">Use the search bar or browse categories to find what you're looking for.</p></div><div class="relative z-10 flex flex-col items-center"><div class="bg-orange-100 text-orange-600 rounded-full w-20 h-20 flex items-center justify-center border-4 border-white shadow"><i data-lucide="shopping-cart" class="w-10 h-10"></i></div><h3 class="mt-4 font-bold">2. Add to Cart</h3><p class="text-sm text-gray-600">On the product page, click the "Add to Cart" button.</p></div><div class="relative z-10 flex flex-col items-center"><div class="bg-orange-100 text-orange-600 rounded-full w-20 h-20 flex items-center justify-center border-4 border-white shadow"><i data-lucide="clipboard-list" class="w-10 h-10"></i></div><h3 class="mt-4 font-bold">3. Review & Checkout</h3><p class="text-sm text-gray-600">Review your items in the cart and click "Proceed to Checkout".</p></div><div class="relative z-10 flex flex-col items-center"><div class="bg-orange-100 text-orange-600 rounded-full w-20 h-20 flex items-center justify-center border-4 border-white shadow"><i data-lucide="credit-card" class="w-10 h-10"></i></div><h3 class="mt-4 font-bold">4. Place Your Order</h3><p class="text-sm text-gray-600">Enter your address, choose a payment method, and place your order.</p></div><div class="relative z-10 flex flex-col items-center"><div class="bg-orange-100 text-orange-600 rounded-full w-20 h-20 flex items-center justify-center border-4 border-white shadow"><i data-lucide="box" class="w-10 h-10"></i></div><h3 class="mt-4 font-bold">5. Receive Your Package</h3><p class="text-sm text-gray-600">Sit back and relax! Your order will be delivered to your doorstep.</p></div></div>`,
+                contact: `<h2>Contact Us</h2><p>We'd love to hear from you! Whether you have a question about features, trials, or anything else, our team is ready to answer all your questions.</p><div class="mt-6 space-y-4"><p class="flex items-center"><i data-lucide="map-pin" class="w-5 h-5 mr-3 text-orange-500"></i>123 Commerce Way, Dhaka, Bangladesh</p><p class="flex items-center"><i data-lucide="phone" class="w-5 h-5 mr-3 text-orange-500"></i>+880 123 456 7890</p><p class="flex items-center"><i data-lucide="mail" class="w-5 h-5 mr-3 text-orange-500"></i>support@kongshop.com</p></div>`, // Simplified contact content
+                privacy: `<h2>Privacy Policy</h2><p>Your privacy is important to us. It is KongShop's policy to respect your privacy regarding any information we may collect from you across our website.</p><p>We only ask for personal information when we truly need it to provide a service to you. We collect it by fair and lawful means, with your knowledge and consent. We also let you know why we’re collecting it and how it will be used.</p>`,
+                returns: `<h2>Return & Refund Policy</h2><p>If you are not 100% satisfied with your purchase, you can return the product and get a full refund or exchange the product for another one, be it similar or not.</p><p>You can return a product for up to 30 days from the date you purchased it. Any product you return must be in the same condition you received it and in the original packaging. Please keep the receipt.</p>`,
+            },
+            editingPageKey: 'about', // Track which page is being edited in admin
         };
+        
+        // --- MOCK DATA (Restored) ---
+        const mockProducts = [
+             { id: 'prod1', name: 'Premium Wireless Earbuds', price: 2499, oldPrice: 3500, rating: 4.8, sold: 120, image: 'https://placehold.co/400x400/F97316/FFFFFF?text=Earbuds', category: 'Electronics', discountText: '', reviews: [{user: 'Mehedi H.', rating: 5, text: 'Amazing sound quality and battery life!', date: new Date('2025-10-20')}, {user: 'Saima A.', rating: 4, text: 'Good product, connects easily.', date: new Date('2025-10-18')}], questions: [{user: 'Fahim', question: 'Is this compatible with iPhone?', answer: 'Yes, it works perfectly with all Bluetooth-enabled devices, including iPhones.', date: new Date('2025-10-19')}] },
+            { id: 'prod2', name: 'Smart Watch with Fitness Tracker', price: 3999, oldPrice: 5000, rating: 4.5, sold: 88, image: 'https://placehold.co/400x400/3B82F6/FFFFFF?text=Watch', category: 'Electronics', discountText: '20% OFF', reviews: [], questions: [] }, // Example with custom text
+            { id: 'prod3', name: 'Gaming Mouse with RGB', price: 1500, oldPrice: 2200, rating: 4.7, sold: 150, image: 'https://placehold.co/400x400/EF4444/FFFFFF?text=Mouse', category: 'Electronics', discountText: '', reviews: [{user: 'GamerGuy', rating: 5, text: 'Best mouse for the price!', date: new Date('2025-09-15')}], questions: [{user: 'Newbie', question: 'Can I change the RGB colors?', answer: 'Yes, it comes with software to customize the lighting effects.', date: new Date('2025-09-12')}] },
+            // ... (rest of the mock products - add discountText: '' if needed)
+            { id: 'prod4', name: '4K Action Camera', price: 8500, oldPrice: 11000, rating: 4.6, sold: 45, image: 'https://placehold.co/400x400/22C55E/FFFFFF?text=Camera', category: 'Electronics', discountText: '', reviews: [], questions: [] },
+            { id: 'prod5', name: 'Portable Bluetooth Speaker', price: 2200, oldPrice: 3000, rating: 4.9, sold: 200, image: 'https://placehold.co/400x400/8B5CF6/FFFFFF?text=Speaker', category: 'Electronics', discountText: '', reviews: [], questions: [] },
+            { id: 'prod6', name: 'Men\'s Casual Cotton Shirt', price: 850, oldPrice: 1200, rating: 4.2, sold: 250, image: 'https://placehold.co/400x400/10B981/FFFFFF?text=Shirt', category: 'Fashion', discountText: '', reviews: [{user: 'Rina', rating: 5, text: 'Fabric is very comfortable.', date: new Date('2025-10-05')}], questions: [{user: 'Kamal', question: 'What is the return policy?', answer: 'We have a 7-day return policy for this item.', date: new Date('2025-10-06')}] },
+            { id: 'prod7', name: 'Women\'s Stylish Handbag', price: 1800, oldPrice: 2500, rating: 4.6, sold: 95, image: 'https://placehold.co/400x400/EC4899/FFFFFF?text=Handbag', category: 'Fashion', discountText: '', reviews: [], questions: [] },
+            { id: 'prod8', name: 'Leather Wallet for Men', price: 600, oldPrice: 900, rating: 4.4, sold: 400, image: 'https://placehold.co/400x400/F59E0B/FFFFFF?text=Wallet', category: 'Fashion', discountText: '', reviews: [], questions: [] },
+            { id: 'prod9', name: 'Classic Aviator Sunglasses', price: 1200, oldPrice: 1800, rating: 4.7, sold: 180, image: 'https://placehold.co/400x400/06B6D4/FFFFFF?text=Sunglasses', category: 'Fashion', discountText: 'Sale', reviews: [], questions: [] }, // Example custom text
+            { id: 'prod10', name: 'Running Shoes for Men', price: 3200, oldPrice: 4500, rating: 4.5, sold: 130, image: 'https://placehold.co/400x400/6366F1/FFFFFF?text=Shoes', category: 'Fashion', discountText: '', reviews: [], questions: [] },
+            { id: 'prod11', name: 'Non-Stick Cookware Set (12 pcs)', price: 4500, oldPrice: 6000, rating: 4.9, sold: 50, image: 'https://placehold.co/400x400/6366F1/FFFFFF?text=Cookware', category: 'Home & Kitchen', discountText: '', reviews: [], questions: [] },
+            { id: 'prod12', name: 'Professional Blender 1500W', price: 5500, oldPrice: 7000, rating: 4.8, sold: 70, image: 'https://placehold.co/400x400/8B5CF6/FFFFFF?text=Blender', category: 'Home & Kitchen', discountText: '', reviews: [], questions: [] },
+            { id: 'prod13', name: 'Espresso Coffee Machine', price: 12500, oldPrice: 16000, rating: 4.9, sold: 30, image: 'https://placehold.co/400x400/374151/FFFFFF?text=Coffee', category: 'Home & Kitchen', discountText: '', reviews: [], questions: [] },
+            { id: 'prod14', name: 'Robotic Vacuum Cleaner', price: 18000, oldPrice: 25000, rating: 4.7, sold: 25, image: 'https://placehold.co/400x400/F472B6/FFFFFF?text=Vacuum', category: 'Home & Kitchen', discountText: '', reviews: [], questions: [] },
+            { id: 'prod15', name: 'Electric Toothbrush', price: 1800, oldPrice: 2500, rating: 4.8, sold: 90, image: 'https://placehold.co/400x400/34D399/FFFFFF?text=Toothbrush', category: 'Health & Beauty', discountText: '', reviews: [], questions: [] },
+            { id: 'prod16', name: 'Vitamin C Serum', price: 950, oldPrice: 1300, rating: 4.6, sold: 300, image: 'https://placehold.co/400x400/FBBF24/FFFFFF?text=Serum', category: 'Health & Beauty', discountText: '', reviews: [], questions: [] },
+        ];
+         const mockOrders = [
+            { id: 'order101', userId: 'mock_johndoe@example.com', customerName: 'johndoe', total: 3349, status: 'Pending', date: new Date('2025-10-21'), items: [{name: 'Premium Wireless Earbuds', quantity: 1, price: 2499}, {name: 'Men\'s Casual Cotton Shirt', quantity: 1, price: 850}] },
+            { id: 'order102', userId: 'mock_janesmith@example.com', customerName: 'janesmith', total: 1800, status: 'Pending', date: new Date('2025-10-20'), items: [{name: 'Women\'s Stylish Handbag', quantity: 1, price: 1800}] },
+            { id: 'order103', userId: 'mock_admin@kongshop.com', customerName: 'admin', total: 10700, status: 'Shipped', date: new Date('2025-10-19'), items: [{name: '4K Action Camera', quantity: 1, price: 8500}, {name: 'Portable Bluetooth Speaker', quantity: 1, price: 2200}] },
+             { id: 'order104', userId: 'mock_ifronrobiul@gmail.com', customerName: 'ifronrobiul', total: 600, status: 'Completed', date: new Date('2025-10-18'), items: [{name: 'Leather Wallet for Men', quantity: 1, price: 600}] },
+        ];
+
 
         // --- DOM ELEMENTS ---
         const mainContent = document.getElementById('main-content');
@@ -325,6 +391,7 @@
         const headerActions = document.getElementById('header-actions');
 
         // --- RENDER FUNCTIONS ---
+        // (Keep all render functions as they primarily depend on the state object)
         function updateHeaderUI() {
             let actionsHTML = '';
             if(state.isLoggedIn) {
@@ -363,26 +430,52 @@
         function renderLoader() { return `<div class="flex justify-center items-center p-20"><div class="loader"></div></div>`; }
         function renderProductGrid(products, title) {
             if (products.length === 0) { return `<section class="mb-8 text-center"><h2 class="text-2xl font-bold text-gray-800 mb-4">${title}</h2><p class="text-gray-500">No products found.</p></section>`; }
-            let productsHTML = products.map(product => `<div class="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-xl transition-shadow duration-300 group" onclick="window.handleNavigation('product', '${product.id}')"><div class="relative"><img src="${product.image}" alt="${product.name}" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/400x400/ccc/000?text=Image+Error';"><div class="absolute top-2 left-2 bg-orange-500 text-white text-xs px-2 py-1 rounded">${Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)}% OFF</div></div><div class="p-4"><h3 class="text-sm font-medium text-gray-800 truncate group-hover:text-orange-600">${product.name}</h3><div class="mt-2"><span class="text-lg font-bold text-orange-500">৳${product.price}</span><span class="text-xs text-gray-500 line-through ml-2">৳${product.oldPrice}</span></div><div class="flex items-center mt-2 text-xs text-gray-500"><div class="flex text-yellow-400">${'<i data-lucide="star" class="w-3 h-3 fill-current"></i>'.repeat(Math.floor(product.rating))}${(product.rating % 1 !== 0 ? '<i data-lucide="star-half" class="w-3 h-3 fill-current"></i>' : '')}</div><span class="ml-1">(${product.sold})</span></div></div></div>`).join('');
+            
+            let productsHTML = products.map(product => {
+                let discountBadge = '';
+                if (product.discountText) {
+                    discountBadge = `<div class="absolute top-2 left-2 bg-orange-500 text-white text-xs px-2 py-1 rounded">${product.discountText}</div>`;
+                } else if (product.oldPrice && product.oldPrice > product.price) {
+                     const discountPercentage = Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100);
+                     discountBadge = `<div class="absolute top-2 left-2 bg-orange-500 text-white text-xs px-2 py-1 rounded">${discountPercentage}% OFF</div>`;
+                }
+
+                return `<div class="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-xl transition-shadow duration-300 group" onclick="window.handleNavigation('product', '${product.id}')">
+                            <div class="relative">
+                                <img src="${product.image}" alt="${product.name}" class="w-full h-48 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/400x400/ccc/000?text=Image+Error';">
+                                ${discountBadge}
+                            </div>
+                            <div class="p-4">
+                                <h3 class="text-sm font-medium text-gray-800 truncate group-hover:text-orange-600">${product.name}</h3>
+                                <div class="mt-2">
+                                    <span class="text-lg font-bold text-orange-500">৳${product.price}</span>
+                                    ${product.oldPrice && product.oldPrice > product.price ? `<span class="text-xs text-gray-500 line-through ml-2">৳${product.oldPrice}</span>` : ''}
+                                </div>
+                                <div class="flex items-center mt-2 text-xs text-gray-500">
+                                    <div class="flex text-yellow-400">${'<i data-lucide="star" class="w-3 h-3 fill-current"></i>'.repeat(Math.floor(product.rating))}${(product.rating % 1 !== 0 ? '<i data-lucide="star-half" class="w-3 h-3 fill-current"></i>' : '')}</div>
+                                    <span class="ml-1">(${product.sold})</span>
+                                </div>
+                            </div>
+                        </div>`;
+                }).join('');
+
             return `<section class="mb-8"><h2 class="text-2xl font-bold text-gray-800 mb-4">${title}</h2><div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">${productsHTML}</div></section>`;
         }
         function renderHomePage() {
             const flashSaleProducts = [...state.products].sort((a, b) => (b.oldPrice - b.price) - (a.oldPrice - a.price)).slice(0, 5);
             const justForYouProducts = [...state.products].sort(() => 0.5 - Math.random()).slice(0, 10);
-            const homeHTML = `<section class="mb-8 rounded-lg overflow-hidden"><img src="https://placehold.co/1200x400/FEF2F2/F97316?text=Biggest+Sale+of+The+Year!" alt="Hero Banner" class="w-full" onerror="this.onerror=null;this.src='https://placehold.co/1200x400/ccc/000?text=Banner+Error';"></section><section class="mb-8 bg-white p-4 rounded-lg shadow"><h3 class="font-bold text-gray-700 mb-3">Categories</h3><div class="grid grid-cols-4 md:grid-cols-8 gap-4 text-center text-sm">${state.categories.map(cat => `<a href="#" onclick="window.handleNavigation('category', '${cat}')" class="flex flex-col items-center hover:text-orange-500"><div class="bg-gray-100 p-3 rounded-full mb-1"><i data-lucide="tag"></i></div>${cat}</a>`).join('')}</div></section>${renderProductGrid(flashSaleProducts, 'Flash Sale')}${renderProductGrid(justForYouProducts, 'Just For You')}`;
+            const homeHTML = `<section class="mb-8 rounded-lg overflow-hidden"><img src="${state.bannerImageUrl}" alt="Hero Banner" class="w-full" onerror="this.onerror=null;this.src='https://placehold.co/1200x400/ccc/000?text=Banner+Error';"></section><section class="mb-8 bg-white p-4 rounded-lg shadow"><h3 class="font-bold text-gray-700 mb-3">Categories</h3><div class="grid grid-cols-4 md:grid-cols-8 gap-4 text-center text-sm">${state.categories.map(cat => `<a href="#" onclick="window.handleNavigation('category', '${cat}')" class="flex flex-col items-center hover:text-orange-500"><div class="bg-gray-100 p-3 rounded-full mb-1"><i data-lucide="tag"></i></div>${cat}</a>`).join('')}</div></section>${renderProductGrid(flashSaleProducts, 'Flash Sale')}${renderProductGrid(justForYouProducts, 'Just For You')}`;
             mainContent.innerHTML = homeHTML;
             lucide.createIcons();
         }
         function renderShopPage() { mainContent.innerHTML = renderProductGrid(state.products, 'All Products'); lucide.createIcons(); }
         function renderFilteredProductsPage(title, products) { mainContent.innerHTML = `<div class="bg-white p-6 rounded-lg shadow-lg"><button onclick="window.handleNavigation('home')" class="mb-4 text-orange-500 hover:text-orange-700 flex items-center"><i data-lucide="arrow-left" class="w-4 h-4 mr-2"></i> Back to Home</button>${renderProductGrid(products, title)}</div>`; lucide.createIcons(); }
         
-        async function renderProductDetailsPage() { 
+        function renderProductDetailsPage() { 
             const productId = state.currentProduct;
-            const productRef = doc(db, 'products', productId);
-            const productSnap = await getDoc(productRef);
+            const product = state.products.find(p => p.id === productId);
 
-            if (!productSnap.exists()) { mainContent.innerHTML = `<p>Product not found.</p>`; return; } 
-            const product = { id: productSnap.id, ...productSnap.data() };
+            if (!product) { mainContent.innerHTML = `<p>Product not found.</p>`; return; } 
 
             // Reviews Section
             const reviewsHtml = product.reviews && product.reviews.length > 0 ? product.reviews.map(review => `
@@ -392,7 +485,7 @@
                         <span class="ml-2 font-semibold text-gray-800">${review.user}</span>
                     </div>
                     <p class="text-gray-600 text-sm">${review.text}</p>
-                    <p class="text-xs text-gray-400 mt-1">${new Date(review.date.seconds * 1000).toLocaleDateString()}</p>
+                    <p class="text-xs text-gray-400 mt-1">${review.date.toLocaleDateString()}</p>
                 </div>
             `).join('') : '<p class="text-gray-500 text-sm">No reviews yet.</p>';
 
@@ -416,7 +509,7 @@
                 <div class="border-t py-3">
                     <p class="font-semibold text-gray-700"><span class="text-orange-500">Q:</span> ${q.question}</p>
                     <p class="text-gray-600 mt-1 pl-5"><span class="text-green-500">A:</span> ${q.answer || 'No answer yet.'}</p>
-                    <p class="text-xs text-gray-400 mt-1 pl-5">Asked by ${q.user} on ${new Date(q.date.seconds * 1000).toLocaleDateString()}</p>
+                    <p class="text-xs text-gray-400 mt-1 pl-5">Asked by ${q.user} on ${q.date.toLocaleDateString()}</p>
                 </div>
             `).join('') : '<p class="text-gray-500 text-sm">No questions yet.</p>';
 
@@ -466,10 +559,29 @@
         function renderCheckoutPage() { mainContent.innerHTML = `<div class="bg-white p-6 rounded-lg shadow-lg max-w-2xl mx-auto"><h2 class="text-3xl font-bold mb-6">Checkout</h2><form id="checkout-form" onsubmit="window.handlePlaceOrder(event)"><div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="md:col-span-2"><label for="name" class="block text-sm font-medium text-gray-700">Full Name</label><input type="text" id="name" value="${state.currentUser ? state.currentUser.displayName : ''}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" required></div><div class="md:col-span-2"><label for="address" class="block text-sm font-medium text-gray-700">Shipping Address</label><input type="text" id="address" value="${state.currentUser.profile?.address || ''}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" required></div><div><label for="city" class="block text-sm font-medium text-gray-700">City</label><input type="text" id="city" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" required></div><div><label for="phone" class="block text-sm font-medium text-gray-700">Phone Number</label><input type="tel" id="phone" value="${state.currentUser.profile?.phone || ''}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" required></div></div><div class="mt-6 border-t pt-6"><h3 class="text-xl font-bold mb-4">Payment Method</h3><div class="space-y-4"><div class="flex items-center"><input type="radio" name="payment" class="h-4 w-4 text-orange-600 border-gray-300 focus:ring-orange-500" checked><label class="ml-3">Cash on Delivery</label></div><div class="flex items-center"><input type="radio" name="payment" class="h-4 w-4 text-orange-600 border-gray-300 focus:ring-orange-500"><label class="ml-3">Credit/Debit Card</label></div><div class="flex items-center"><input type="radio" name="payment" class="h-4 w-4 text-orange-600 border-gray-300 focus:ring-orange-500"><label class="ml-3">Mobile Banking</label></div></div></div><div class="mt-8 text-right"><button type="submit" class="bg-orange-500 text-white py-3 px-8 rounded-lg font-semibold hover:bg-orange-600">Place Order</button></div></form></div>`; }
         function renderOrderConfirmationPage() { mainContent.innerHTML = `<div class="text-center bg-white p-10 rounded-lg shadow-lg"><i data-lucide="check-circle" class="w-24 h-24 mx-auto text-green-500"></i><h2 class="text-3xl font-bold mt-4">Order Placed Successfully!</h2><p class="text-gray-500 mt-2">Thank you for your purchase. You can check your order history in your profile.</p><button onclick="window.handleNavigation('home')" class="mt-8 bg-orange-500 text-white py-2 px-6 rounded-lg font-semibold hover:bg-orange-600">Continue Shopping</button></div>`; lucide.createIcons(); }
         
-        function renderAboutUsPage() { mainContent.innerHTML = `<div class="bg-white p-8 rounded-lg shadow-lg prose max-w-none"><h2>About KongShop</h2><p>Welcome to KongShop, a project dedicated to demonstrating a modern e-commerce platform...</p></div>`; }
-        function renderHowToBuyPage() { mainContent.innerHTML = `<div class="bg-white p-8 rounded-lg shadow-lg prose max-w-none"><h2 class="text-center">How to Buy: 5 Easy Steps</h2>...</div>`; lucide.createIcons(); }
-        function renderContactPage() { mainContent.innerHTML = `<div class="bg-white p-8 rounded-lg shadow-lg">...</div>`; lucide.createIcons(); }
-        function renderPolicyPage(title, content) { mainContent.innerHTML = `<div class="bg-white p-8 rounded-lg shadow-lg prose max-w-none"><h2>${title}</h2>${content}</div>`; }
+        function renderAboutUsPage() { mainContent.innerHTML = `<div class="bg-white p-8 rounded-lg shadow-lg prose max-w-none">${state.pageContent.about}</div>`; }
+        function renderHowToBuyPage() { mainContent.innerHTML = `<div class="bg-white p-8 rounded-lg shadow-lg prose max-w-none">${state.pageContent.howToBuy}</div>`; lucide.createIcons(); }
+        function renderContactPage() { 
+            mainContent.innerHTML = `<div class="bg-white p-8 rounded-lg shadow-lg">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                     <div class="prose max-w-none">${state.pageContent.contact}</div>
+                     <div>
+                          <form onsubmit="event.preventDefault(); showToast('Message sent (simulation)!');">
+                              <div class="space-y-4">
+                                  <div><label for="contact-name" class="block text-sm font-medium text-gray-700">Full Name</label><input type="text" id="contact-name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"></div>
+                                  <div><label for="contact-email" class="block text-sm font-medium text-gray-700">Email</label><input type="email" id="contact-email" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"></div>
+                                  <div><label for="contact-message" class="block text-sm font-medium text-gray-700">Message</label><textarea id="contact-message" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"></textarea></div>
+                                  <div class="text-right"><button type="submit" class="bg-orange-500 text-white py-2 px-6 rounded-lg font-semibold hover:bg-orange-600">Send Message</button></div>
+                              </div>
+                          </form>
+                     </div>
+                </div>
+            </div>`; 
+            lucide.createIcons(); 
+        }
+        function renderPolicyPage(pageKey, title) { 
+            mainContent.innerHTML = `<div class="bg-white p-8 rounded-lg shadow-lg prose max-w-none"><h2>${title}</h2>${state.pageContent[pageKey]}</div>`; 
+        }
         
         // --- ADMIN RENDER FUNCTIONS ---
         function renderAdminPanel() { 
@@ -479,16 +591,29 @@
                 case 'orders': content = renderAdminOrders(); break; 
                 case 'products': content = renderAdminProducts(); break; 
                 case 'categories': content = renderAdminCategories(); break; 
+                case 'content': content = renderAdminSiteContent(); break; // New Case
             } 
             mainContent.innerHTML = `<div class="bg-white p-6 rounded-lg shadow-lg"><h2 class="text-3xl font-bold mb-4">Admin Panel</h2><div class="border-b border-gray-200"><nav class="-mb-px flex space-x-6" aria-label="Tabs">
             <button onclick="window.setAdminTab('dashboard')" class="admin-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${state.adminCurrentTab === 'dashboard' ? 'active' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}">Dashboard</button>
             <button onclick="window.setAdminTab('orders')" class="admin-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${state.adminCurrentTab === 'orders' ? 'active' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}">Orders</button>
             <button onclick="window.setAdminTab('products')" class="admin-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${state.adminCurrentTab === 'products' ? 'active' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}">Products</button>
             <button onclick="window.setAdminTab('categories')" class="admin-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${state.adminCurrentTab === 'categories' ? 'active' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}">Categories</button>
+             <button onclick="window.setAdminTab('content')" class="admin-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${state.adminCurrentTab === 'content' ? 'active' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}">Site Content</button> <!-- New Tab -->
             </nav></div><div id="admin-content" class="mt-6">${content}</div></div>`; 
             lucide.createIcons(); 
         }
+        function calculateDashboardStats() {
+            let income = 0, pending = 0, completed = 0, canceled = 0;
+            state.orders.forEach(order => {
+                if (order.status === 'Completed') income += order.total;
+                if (order.status === 'Pending') pending++;
+                if (order.status === 'Completed') completed++;
+                if (order.status === 'Canceled') canceled++;
+            });
+            state.dashboardStats = { income, pending, completed, canceled };
+        }
         function renderAdminDashboard() {
+            calculateDashboardStats(); // Recalculate stats before rendering
             const { income, pending, completed, canceled } = state.dashboardStats;
             return `
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -511,67 +636,224 @@
                 </div>
             `;
         }
-        function renderAdminOrders() { if (state.orders.length === 0) return '<p>No orders found.</p>'; const ordersHtml = state.orders.map(order => `<tr class="bg-white hover:bg-gray-50"><td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#${order.id.substring(0,6)}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${order.customerName}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${new Date(order.date.seconds * 1000).toLocaleDateString()}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">৳${order.total.toFixed(2)}</td><td class="px-6 py-4 whitespace-nowrap text-sm"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${order.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' : order.status === 'Shipped' ? 'bg-blue-100 text-blue-800' : order.status === 'Completed' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${order.status}</span></td><td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">${order.status === 'Pending' ? `<button onclick="window.handleUpdateOrderStatus('${order.id}', 'Shipped')" class="text-indigo-600 hover:text-indigo-900">Ship</button>` : order.status === 'Shipped' ? `<button onclick="window.handleUpdateOrderStatus('${order.id}', 'Completed')" class="text-green-600 hover:text-green-900">Complete</button>` : ''} <button onclick="window.handleUpdateOrderStatus('${order.id}', 'Canceled')" class="text-red-600 hover:text-red-900 ml-2">Cancel</button></td></tr>`).join(''); return `<div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th><th scope="col" class="relative px-6 py-3"><span class="sr-only">Action</span></th></tr></thead><tbody class="bg-white divide-y divide-gray-200">${ordersHtml}</tbody></table></div>`; }
+        function renderAdminOrders() { if (state.orders.length === 0) return '<p>No orders found.</p>'; const ordersHtml = state.orders.map(order => `<tr class="bg-white hover:bg-gray-50"><td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#${order.id.substring(5,11)}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${order.customerName}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${order.date.toLocaleDateString()}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">৳${order.total.toFixed(2)}</td><td class="px-6 py-4 whitespace-nowrap text-sm"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${order.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' : order.status === 'Shipped' ? 'bg-blue-100 text-blue-800' : order.status === 'Completed' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${order.status}</span></td><td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">${order.status === 'Pending' ? `<button onclick="window.handleUpdateOrderStatus('${order.id}', 'Shipped')" class="text-indigo-600 hover:text-indigo-900">Ship</button>` : order.status === 'Shipped' ? `<button onclick="window.handleUpdateOrderStatus('${order.id}', 'Completed')" class="text-green-600 hover:text-green-900">Complete</button>` : ''} <button onclick="window.handleUpdateOrderStatus('${order.id}', 'Canceled')" class="text-red-600 hover:text-red-900 ml-2">Cancel</button></td></tr>`).join(''); return `<div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th><th scope="col" class="relative px-6 py-3"><span class="sr-only">Action</span></th></tr></thead><tbody class="bg-white divide-y divide-gray-200">${ordersHtml}</tbody></table></div>`; }
         function renderAdminProducts() { const productsHtml = state.products.map(p => `<tr class="hover:bg-gray-50"><td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${p.name}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${p.category}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">৳${p.price}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${p.sold}</td><td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-4"><button onclick="window.openProductForm('${p.id}')" class="text-indigo-600 hover:text-indigo-900">Edit</button><button onclick="window.handleDeleteProduct('${p.id}')" class="text-red-600 hover:text-red-900">Delete</button></td></tr>`).join(''); return `<div class="flex justify-end mb-4"><button onclick="window.openProductForm()" class="bg-orange-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-orange-600 flex items-center space-x-2"><i data-lucide="plus-circle" class="w-5 h-5"></i><span>Add Product</span></button></div><div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sold</th><th scope="col" class="relative px-6 py-3"><span class="sr-only">Actions</span></th></tr></thead><tbody class="bg-white divide-y divide-gray-200">${productsHtml}</tbody></table></div>`; }
         function renderAdminCategories() { const categoriesHtml = state.categories.map(c => `<span class="bg-gray-100 text-gray-800 text-sm font-medium mr-2 mb-2 inline-block px-2.5 py-0.5 rounded">${c}</span>`).join(''); return `<div><h3 class="text-lg font-medium leading-6 text-gray-900">Existing Categories</h3><div class="mt-4 flex flex-wrap">${categoriesHtml}</div></div><div class="mt-8 border-t pt-6"><h3 class="text-lg font-medium leading-6 text-gray-900">Add New Category</h3><form onsubmit="window.handleSaveCategory(event)" class="mt-4 flex items-center space-x-3"><input type="text" id="new-category-name" class="block w-full max-w-xs rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" placeholder="New category name" required><button type="submit" class="bg-orange-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-orange-600">Add</button></form></div>`; }
         
-        // --- USER PROFILE RENDER FUNCTIONS ---
-        function renderProfilePage() {
-            let content = '';
-            switch(state.profileCurrentTab) {
-                case 'profile': content = renderProfileInfo(); break;
-                case 'orders': content = renderProfileOrders(); break;
-                case 'settings': content = renderProfileSettings(); break;
-            }
-            mainContent.innerHTML = `
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                    <div class="md:col-span-1">
-                        <div class="bg-white p-4 rounded-lg shadow-lg">
-                            <h3 class="font-bold text-lg mb-4">Hello, ${state.currentUser.displayName}</h3>
-                            <nav class="flex flex-col space-y-2">
-                                <button onclick="window.setProfileTab('profile')" class="profile-tab text-left w-full px-3 py-2 text-sm font-medium rounded-md ${state.profileCurrentTab === 'profile' ? 'active' : 'text-gray-600 hover:bg-gray-100'}">My Profile</button>
-                                <button onclick="window.setProfileTab('orders')" class="profile-tab text-left w-full px-3 py-2 text-sm font-medium rounded-md ${state.profileCurrentTab === 'orders' ? 'active' : 'text-gray-600 hover:bg-gray-100'}">My Orders</button>
-                                <button onclick="window.setProfileTab('settings')" class="profile-tab text-left w-full px-3 py-2 text-sm font-medium rounded-md ${state.profileCurrentTab === 'settings' ? 'active' : 'text-gray-600 hover:bg-gray-100'}">Settings</button>
-                            </nav>
+         function renderAdminSiteContent() {
+             const pageOptions = Object.keys(state.pageContent).map(key => {
+                 // Simple title generation (can be improved)
+                 let title = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+                 if (key === 'howToBuy') title = 'How to Buy';
+                 return `<option value="${key}" ${state.editingPageKey === key ? 'selected' : ''}>${title}</option>`;
+             }).join('');
+
+             return `
+                <div class="space-y-8">
+                    <!-- Homepage Banner Section -->
+                    <div>
+                        <h3 class="text-xl font-semibold mb-4">Homepage Banner</h3>
+                        <div class="flex items-center space-x-4">
+                            <img id="banner-preview" src="${state.bannerImageUrl}" class="w-48 h-auto object-cover rounded border" onerror="this.onerror=null;this.src='https://placehold.co/192x77/ccc/000?text=Error';">
+                            <div>
+                                <label for="banner-upload" class="block text-sm font-medium text-gray-700 mb-1">Upload New Banner</label>
+                                <input type="file" id="banner-upload" accept="image/*" onchange="window.handleBannerUpload(event)" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100">
+                                <p class="text-xs text-gray-500 mt-1">Recommended size: 1200x400 pixels.</p>
+                            </div>
                         </div>
                     </div>
-                    <div class="md:col-span-3 bg-white p-6 rounded-lg shadow-lg">${content}</div>
+
+                    <!-- Static Page Editor Section -->
+                    <div class="border-t pt-8">
+                        <h3 class="text-xl font-semibold mb-4">Edit Page Content</h3>
+                         <div class="mb-4">
+                             <label for="page-select" class="block text-sm font-medium text-gray-700">Select Page to Edit:</label>
+                             <select id="page-select" onchange="window.handlePageSelectChange(this.value)" class="mt-1 block w-full max-w-xs rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500">
+                                 ${pageOptions}
+                             </select>
+                         </div>
+                         <div>
+                             <label for="page-content-editor" class="block text-sm font-medium text-gray-700">Page Content (HTML allowed for simple formatting like paragraphs):</label>
+                             <textarea id="page-content-editor" rows="15" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 font-mono text-sm">${state.pageContent[state.editingPageKey] || ''}</textarea>
+                         </div>
+                         <div class="text-right mt-4">
+                              <button onclick="window.handleSavePageContent()" class="bg-orange-500 text-white py-2 px-6 rounded-lg font-semibold hover:bg-orange-600">Save Page Content</button>
+                         </div>
+                    </div>
+                </div>
+             `;
+         }
+
+        // --- USER PROFILE RENDER FUNCTIONS ---
+         function maskEmail(email) {
+            if (!email) return '';
+            const [localPart, domain] = email.split('@');
+            if (localPart.length <= 2) return `${localPart}***@${domain}`;
+            return `${localPart.substring(0, 2)}****@${domain}`;
+         }
+
+        function renderProfilePage() {
+            let content = '';
+            let pageTitle = "Manage My Account"; // Default Title
+
+            // Determine content based on the active tab
+            switch(state.profileCurrentTab) {
+                case 'profile': content = renderProfileEditView(); pageTitle="My Profile"; break; // Use specific edit view
+                case 'address': content = renderAddressBookView(); pageTitle="Address Book"; break; 
+                case 'payment': content = renderPaymentOptionsView(); pageTitle="My Payment Options"; break; 
+                case 'wallet': content = renderWalletView(); pageTitle="KongShop Wallet"; break; 
+                case 'orders': content = renderProfileOrders(); pageTitle="My Orders"; break;
+                case 'returns': content = renderReturnsView(); pageTitle="My Returns"; break; 
+                case 'cancellations': content = renderCancellationsView(); pageTitle="My Cancellations"; break; 
+                case 'reviews': content = renderReviewsView(); pageTitle="My Reviews"; break; 
+                case 'wishlist': content = renderWishlistView(); pageTitle="My Wishlist & Followed Stores"; break; 
+                case 'sell': content = renderSellOnKongShopView(); pageTitle="Sell On KongShop"; break; 
+                case 'manage': // Default view combining profile and address summary
+                default:
+                    content = renderManageMyAccountView();
+                    state.profileCurrentTab = 'manage'; // Ensure tab state is correct
+                    pageTitle = "Manage My Account";
+                    break; 
+            }
+
+            mainContent.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                    <!-- Sidebar -->
+                    <div class="md:col-span-1">
+                        <div class="bg-white p-4 rounded-lg shadow-lg space-y-4">
+                            <p class="text-sm text-gray-500">Hello, ${state.currentUser.displayName}</p>
+                            
+                            <div>
+                                <h3 class="font-semibold text-gray-800 mb-2">Manage My Account</h3>
+                                <nav class="flex flex-col space-y-1">
+                                    <a href="#" onclick="window.setProfileTab('profile')" class="profile-sidebar-link ${['manage', 'profile'].includes(state.profileCurrentTab) ? 'active' : ''}">My Profile</a>
+                                    <a href="#" onclick="window.setProfileTab('address')" class="profile-sidebar-link ${state.profileCurrentTab === 'address' ? 'active' : ''}">Address Book</a>
+                                    <a href="#" onclick="window.setProfileTab('payment')" class="profile-sidebar-link ${state.profileCurrentTab === 'payment' ? 'active' : ''}">My Payment Options</a>
+                                    <a href="#" onclick="window.setProfileTab('wallet')" class="profile-sidebar-link ${state.profileCurrentTab === 'wallet' ? 'active' : ''}">KongShop Wallet</a>
+                                </nav>
+                            </div>
+
+                             <div>
+                                <h3 class="font-semibold text-gray-800 mb-2">My Orders</h3>
+                                <nav class="flex flex-col space-y-1">
+                                    <a href="#" onclick="window.setProfileTab('orders')" class="profile-sidebar-link ${state.profileCurrentTab === 'orders' ? 'active' : ''}">My Orders</a>
+                                    <a href="#" onclick="window.setProfileTab('returns')" class="profile-sidebar-link ${state.profileCurrentTab === 'returns' ? 'active' : ''}">My Returns</a>
+                                    <a href="#" onclick="window.setProfileTab('cancellations')" class="profile-sidebar-link ${state.profileCurrentTab === 'cancellations' ? 'active' : ''}">My Cancellations</a>
+                                </nav>
+                            </div>
+                            
+                            <a href="#" onclick="window.setProfileTab('reviews')" class="profile-sidebar-link ${state.profileCurrentTab === 'reviews' ? 'active' : ''}">My Reviews</a>
+                            <a href="#" onclick="window.setProfileTab('wishlist')" class="profile-sidebar-link ${state.profileCurrentTab === 'wishlist' ? 'active' : ''}">My Wishlist & Followed Stores</a>
+                            <a href="#" onclick="window.setProfileTab('sell')" class="profile-sidebar-link ${state.profileCurrentTab === 'sell' ? 'active' : ''}">Sell On KongShop</a>
+
+                        </div>
+                    </div>
+                    <!-- Main Content -->
+                    <div class="md:col-span-3 bg-white p-6 rounded-lg shadow-lg">
+                        <h2 class="text-2xl font-bold mb-6">${pageTitle}</h2>
+                        ${content}
+                    </div>
                 </div>
             `;
             lucide.createIcons();
         }
-        function renderProfileInfo() {
+
+        function renderManageMyAccountView() {
             const user = state.currentUser;
-            return `
-                <h2 class="text-2xl font-bold mb-6">My Profile</h2>
-                <form id="profile-form" onsubmit="window.handleUpdateProfile(event)">
-                    <div class="space-y-4">
-                        <div><label class="block text-sm font-medium text-gray-700">Full Name</label><input type="text" id="profile-name" value="${user.displayName}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" required></div>
-                        <div><label class="block text-sm font-medium text-gray-700">Email</label><input type="email" value="${user.email}" class="mt-1 block w-full rounded-md border-gray-300 bg-gray-100 shadow-sm" disabled></div>
-                        <div><label class="block text-sm font-medium text-gray-700">Phone Number</label><input type="tel" id="profile-phone" value="${user.profile?.phone || ''}" placeholder="e.g., 01712345678" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"></div>
-                        <div><label class="block text-sm font-medium text-gray-700">Shipping Address</label><textarea id="profile-address" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500">${user.profile?.address || ''}</textarea></div>
+             return `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Personal Profile Section -->
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                             <h3 class="text-lg font-semibold text-gray-700">Personal Profile</h3>
+                             <button onclick="window.openEditProfileModal()" class="text-sm text-blue-600 hover:underline">EDIT</button>
+                        </div>
+                        <div class="space-y-2 text-gray-600">
+                             <p>${user.displayName}</p>
+                             <p>${maskEmail(user.email)}</p>
+                             <div class="flex items-center pt-2">
+                                <input id="receiveMarketing" type="checkbox" ${user.profile?.marketingEmails ? 'checked' : ''} onclick="handleMarketingEmailToggle(this.checked)" class="h-4 w-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500">
+                                <label for="receiveMarketing" class="ml-2 block text-sm text-gray-900">Receive marketing emails</label>
+                            </div>
+                        </div>
                     </div>
-                    <div class="text-right mt-6"><button type="submit" class="bg-orange-500 text-white py-2 px-6 rounded-lg font-semibold hover:bg-orange-600">Save Changes</button></div>
-                </form>
-            `;
+                    <!-- Address Book Section -->
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-semibold text-gray-700">Address Book</h3>
+                            <button onclick="window.addAddress('shipping')" class="text-sm text-blue-600 hover:underline flex items-center"><i data-lucide="plus" class="w-4 h-4 mr-1"></i>Add</button>
+                        </div>
+                        <div class="grid grid-cols-1 gap-4">
+                            <div class="border p-4 rounded-md">
+                                <h4 class="font-medium text-gray-800 mb-2">Shipping Address</h4>
+                                ${user.profile?.address ? 
+                                    `<p class="text-sm text-gray-600">${user.profile.address.replace(/\n/g, '<br>')}</p> 
+                                    <button onclick="window.addAddress('shipping')" class="text-xs text-blue-500 hover:underline mt-1">Edit</button>` : 
+                                    `<p class="text-sm text-gray-500">Save your shipping address here.</p>`
+                                }
+                            </div>
+                             <div class="border p-4 rounded-md">
+                                <h4 class="font-medium text-gray-800 mb-2">Billing Address</h4>
+                                ${user.profile?.billingAddress ? 
+                                    `<p class="text-sm text-gray-600">${user.profile.billingAddress.replace(/\n/g, '<br>')}</p>
+                                    <button onclick="window.addAddress('billing')" class="text-xs text-blue-500 hover:underline mt-1">Edit</button>` : 
+                                    `<p class="text-sm text-gray-500">Save your billing address here.</p>`
+                                }
+                             </div>
+                        </div>
+                    </div>
+                </div>
+             `;
+        }
+
+        // --- Placeholder render functions for new sidebar items ---
+        function renderAddressBookView() { return `<h3 class="text-xl font-semibold mb-4">Address Book</h3><p>Manage your shipping and billing addresses here. (Coming Soon)</p>`; }
+        function renderPaymentOptionsView() { return `<h3 class="text-xl font-semibold mb-4">My Payment Options</h3><p>Manage your saved cards and payment methods. (Coming Soon)</p>`; }
+        function renderWalletView() { return `<h3 class="text-xl font-semibold mb-4">KongShop Wallet</h3><p>View your wallet balance and transaction history. (Coming Soon)</p>`; }
+        function renderReturnsView() { return `<h3 class="text-xl font-semibold mb-4">My Returns</h3><p>View your return requests and status. (Coming Soon)</p>`; }
+        function renderCancellationsView() { return `<h3 class="text-xl font-semibold mb-4">My Cancellations</h3><p>View your cancelled orders. (Coming Soon)</p>`; }
+        function renderReviewsView() { return `<h3 class="text-xl font-semibold mb-4">My Reviews</h3><p>Manage the reviews you have submitted. (Coming Soon)</p>`; }
+        function renderWishlistView() { return `<h3 class="text-xl font-semibold mb-4">My Wishlist & Followed Stores</h3><p>View your saved items and favorite stores. (Coming Soon)</p>`; }
+        function renderSellOnKongShopView() { return `<h3 class="text-xl font-semibold mb-4">Sell On KongShop</h3><p>Information about becoming a seller. (Coming Soon)</p>`; }
+
+
+        // --- Updated/Kept functions ---
+        function renderProfileEditView() { // Renamed from renderProfileInfo
+            const user = state.currentUser;
+            // This function is now used when 'My Profile' is clicked in sidebar
+             return `
+                 <form id="profile-form" onsubmit="window.handleUpdateProfileFull(event)">
+                     <div class="space-y-4">
+                        <div><label class="block text-sm font-medium text-gray-700">Full Name</label><input type="text" id="profile-name-full" value="${user.displayName}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" required></div>
+                        <div><label class="block text-sm font-medium text-gray-700">Email</label><input type="email" value="${user.email}" class="mt-1 block w-full rounded-md border-gray-300 bg-gray-100 shadow-sm" disabled></div>
+                        <div><label class="block text-sm font-medium text-gray-700">Phone Number</label><input type="tel" id="profile-phone-full" value="${user.profile?.phone || ''}" placeholder="e.g., 01712345678" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"></div>
+                          <div class="flex items-center pt-2">
+                             <input id="profile-marketing-full" type="checkbox" ${user.profile?.marketingEmails ? 'checked' : ''} class="h-4 w-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500">
+                             <label for="profile-marketing-full" class="ml-2 block text-sm text-gray-900">Receive marketing emails</label>
+                         </div>
+                     </div>
+                     <div class="text-right mt-6">
+                          <button type="submit" class="bg-orange-500 text-white py-2 px-6 rounded-lg font-semibold hover:bg-orange-600">Save Changes</button>
+                     </div>
+                 </form>
+             `;
         }
         function renderProfileOrders() {
             const userOrders = state.orders.filter(o => o.userId === state.currentUser.uid);
-            if(userOrders.length === 0) return `<h2 class="text-2xl font-bold mb-6">My Orders</h2><p>You have not placed any orders yet.</p>`;
+            if(userOrders.length === 0) return `<p>You have not placed any orders yet.</p>`; // Removed title H2
 
             const ordersHtml = userOrders.map(order => `
                 <tr class="hover:bg-gray-50">
-                    <td class="px-4 py-3 text-sm font-medium">#${order.id.substring(0,6)}</td>
-                    <td class="px-4 py-3 text-sm">${new Date(order.date.seconds * 1000).toLocaleDateString()}</td>
+                    <td class="px-4 py-3 text-sm font-medium">#${order.id.substring(5,11)}</td>
+                    <td class="px-4 py-3 text-sm">${order.date.toLocaleDateString()}</td>
                     <td class="px-4 py-3 text-sm">৳${order.total.toFixed(2)}</td>
                     <td class="px-4 py-3 text-sm"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${order.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' : order.status === 'Shipped' ? 'bg-blue-100 text-blue-800' : order.status === 'Completed' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${order.status}</span></td>
                     <td class="px-4 py-3 text-sm text-right"><button onclick="window.showOrderDetails('${order.id}')" class="text-indigo-600 hover:text-indigo-900">View</button></td>
                 </tr>`).join('');
-            return `<h2 class="text-2xl font-bold mb-6">My Orders</h2><div class="overflow-x-auto"><table class="min-w-full divide-y"><thead><tr><th class="px-4 py-2 text-left">Order ID</th><th class="px-4 py-2 text-left">Date</th><th class="px-4 py-2 text-left">Total</th><th class="px-4 py-2 text-left">Status</th><th></th></tr></thead><tbody>${ordersHtml}</tbody></table></div>`;
+            return `<div class="overflow-x-auto"><table class="min-w-full divide-y"><thead><tr><th class="px-4 py-2 text-left">Order ID</th><th class="px-4 py-2 text-left">Date</th><th class="px-4 py-2 text-left">Total</th><th class="px-4 py-2 text-left">Status</th><th></th></tr></thead><tbody>${ordersHtml}</tbody></table></div>`;
         }
-        function renderProfileSettings() {
+        function renderProfileSettings() { // Now possibly part of 'My Profile' or redundant
             return `
-                <h2 class="text-2xl font-bold mb-6">Settings</h2>
                 <form id="password-change-form" onsubmit="window.handlePasswordChange(event)">
                     <div class="space-y-4 max-w-md">
                         <h3 class="text-lg font-medium">Change Password</h3>
@@ -612,7 +894,7 @@
                     title: '🎉 New Order Received!',
                     color: 16747520, // Orange
                     fields: [
-                        { name: 'Order ID', value: `#${newOrder.id.substring(0,6)}`, inline: true },
+                        { name: 'Order ID', value: `#${newOrder.id.substring(5,11)}`, inline: true },
                         { name: 'Customer', value: newOrder.customerName, inline: true },
                         { name: 'Total Amount', value: `৳${newOrder.total.toFixed(2)}`, inline: true },
                         { name: 'Items Ordered', value: "```" + itemsDescription + "```" }
@@ -633,24 +915,26 @@
             }
         }
 
-        async function handlePlaceOrder(event) {
+        function handlePlaceOrder(event) { // Removed async
             event.preventDefault();
             if (!state.isLoggedIn) {
                 showToast('Please log in to place an order.', 'error');
                 showModal('login-modal');
                 return;
             }
+            const newOrderId = `order${Date.now()}`; // Simple unique ID
             const orderData = {
+                id: newOrderId,
                 userId: state.currentUser.uid,
                 customerName: state.currentUser.displayName,
                 total: state.cart.reduce((total, item) => total + (item.price * item.quantity), 0) + 50,
                 status: 'Pending',
                 date: new Date(),
-                items: state.cart
+                items: state.cart.map(i => ({ ...i })) // Create copies of cart items
             };
             
-            const newOrderRef = await addDoc(collection(db, "orders"), orderData);
-            await notifyDiscord({ ...orderData, id: newOrderRef.id });
+            state.orders.push(orderData); // Add to local state
+            notifyDiscord(orderData); // Still notify Discord (async but we don't wait)
 
             state.cart = [];
             updateCartCount();
@@ -667,6 +951,10 @@
             window.scrollTo(0, 0);
             updateActiveNavLink(page);
             if(page !== 'search' && page !== 'category') { searchInput.value = ''; }
+             if (page === 'profile' && !['profile', 'address', 'payment', 'wallet', 'orders', 'returns', 'cancellations', 'reviews', 'wishlist', 'sell'].includes(state.profileCurrentTab)) { 
+                 state.profileCurrentTab = 'manage'; // Reset to default if navigating directly to profile page
+             }
+
             setTimeout(() => {
                 switch (page) {
                     case 'home': renderHomePage(); break;
@@ -675,15 +963,15 @@
                     case 'about': renderAboutUsPage(); break;
                     case 'contact': renderContactPage(); break;
                     case 'admin': renderAdminPanel(); break;
-                    case 'profile': renderProfilePage(); break;
-                    case 'product': state.currentProduct = data; renderProductDetailsPage(); break;
+                    case 'profile': renderProfilePage(); break; // This will now render based on state.profileCurrentTab
+                    case 'product': state.currentProduct = data; renderProductDetailsPage(); break; // Uses state.products now
                     case 'cart': renderCartPage(); break;
                     case 'checkout': renderCheckoutPage(); break;
                     case 'orderConfirmation': renderOrderConfirmationPage(); break;
                     case 'category': state.currentCategory = data; renderFilteredProductsPage(`Category: ${data}`, state.products.filter(p => p.category === data)); break;
                     case 'search': state.searchQuery = data; renderFilteredProductsPage(`Search Results for "${data}"`, state.products.filter(p => p.name.toLowerCase().includes(data) || p.category.toLowerCase().includes(data))); break;
-                    case 'privacy': renderPolicyPage('Privacy Policy', '<p>Your privacy is important to us...</p>'); break;
-                    case 'returns': renderPolicyPage('Return & Refund Policy', '<p>If you are not 100% satisfied...</p>'); break;
+                    case 'privacy': renderPolicyPage('privacy', 'Privacy Policy'); break;
+                    case 'returns': renderPolicyPage('returns', 'Return & Refund Policy'); break;
                     default: renderHomePage();
                 }
             }, 300);
@@ -694,63 +982,95 @@
         window.hideModal = (modalId) => { const modal = document.getElementById(modalId); if (modal) modal.classList.add('hidden'); }
         window.togglePasswordVisibility = (inputId) => { const input = document.getElementById(inputId); const icon = input.nextElementSibling.querySelector('i'); if (input.type === 'password') { input.type = 'text'; icon.setAttribute('data-lucide', 'eye-off'); } else { input.type = 'password'; icon.setAttribute('data-lucide', 'eye'); } lucide.createIcons(); }
         
-        async function handleGoogleSignIn() {
-            try {
-                await signInWithPopup(auth, googleProvider);
-                // The onAuthStateChanged listener will handle the rest.
-                hideModal('login-modal');
-            } catch (error) {
-                console.error("Google Sign-in Error:", error);
-                showToast(`Error: ${error.message}`, 'error');
-            }
-        }
-        window.handleGoogleSignIn = handleGoogleSignIn;
+        // Removed handleGoogleSignIn
         
-        async function handleSignup(event) { 
+        function handleLogin(event) { // Simplified login without Firebase/OTP
+            event.preventDefault(); 
+            const email = document.getElementById('login-email').value.toLowerCase();
+            const password = document.getElementById('login-password').value; // In real app, verify password
+            
+            // Basic simulation: Check if user exists (or create mock user if not)
+             const adminEmails = ['admin@kongshop.com', 'ifronrobiul@gmail.com'];
+             const isAdmin = adminEmails.includes(email);
+             
+             // Check mock password (replace with real validation later if needed)
+             const MOCK_PASS = "password123"; // Example password for all users
+             if (password !== MOCK_PASS && !isAdmin) { // Admins can use any password for now
+                showToast('Invalid credentials.', 'error');
+                return;
+             }
+             
+             state.isLoggedIn = true;
+             state.currentUser = { 
+                 uid: `mock_${email}`, 
+                 displayName: email.split('@')[0], 
+                 email: email, 
+                 isAdmin: isAdmin,
+                 profile: { phone: '', address: '', marketingEmails: false, billingAddress: '' } // Add new profile fields
+             };
+             state.isAdmin = isAdmin;
+
+             showToast(`Welcome, ${state.currentUser.displayName}!`);
+             updateHeaderUI();
+             hideModal('login-modal');
+             handleNavigation('home'); // Go home after login
+        }
+        window.handleLogin = handleLogin;
+        
+        // Removed handleOtpSubmit
+
+        function handleSignup(event) { // Simplified signup
             event.preventDefault(); 
             const name = document.getElementById('signup-name').value; 
-            const email = document.getElementById('signup-email').value; 
+            const email = document.getElementById('signup-email').value.toLowerCase(); 
             const password = document.getElementById('signup-password').value;
-            try {
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-                await setDoc(doc(db, "users", user.uid), {
-                    uid: user.uid,
-                    displayName: name,
-                    email: user.email,
-                    isAdmin: false,
-                    profile: { phone: '', address: ''}
-                });
-                // onAuthStateChanged will handle UI updates
-                hideModal('signup-modal');
-            } catch (error) {
-                showToast(`Signup failed: ${error.message}`, 'error');
-            }
+             
+            // Basic simulation: Directly log in the new user
+             state.isLoggedIn = true;
+             state.currentUser = { 
+                 uid: `mock_${email}`, 
+                 displayName: name, 
+                 email: email, 
+                 isAdmin: false, // New signups are not admins
+                 profile: { phone: '', address: '', marketingEmails: false, billingAddress: '' } // Add new profile fields
+             };
+             state.isAdmin = false;
+             
+             showToast(`Welcome, ${state.currentUser.displayName}! Your account is created.`);
+             updateHeaderUI();
+             hideModal('signup-modal');
+             handleNavigation('home'); // Go home after signup
         }
         window.handleSignup = handleSignup;
         
-        async function handleLogout() { 
-            await signOut(auth);
-            // onAuthStateChanged will handle UI updates
+        function handleLogout() { // Simplified logout
+             state.isLoggedIn = false;
+             state.currentUser = null;
+             state.isAdmin = false;
+             showToast('You have been logged out.');
+             updateHeaderUI();
+             handleNavigation('home');
         }
         window.handleLogout = handleLogout;
         
         // --- ADMIN ACTION HANDLERS (now on window object) ---
         window.setAdminTab = (tab) => { state.adminCurrentTab = tab; renderAdminPanel(); }
         
-        async function handleUpdateOrderStatus(orderId, newStatus) {
-            const orderRef = doc(db, 'orders', orderId);
-            await updateDoc(orderRef, { status: newStatus });
-            showToast(`Order #${orderId.substring(0,6)} updated to ${newStatus}.`);
-            // The onSnapshot listener will re-render the list automatically
+        function handleUpdateOrderStatus(orderId, newStatus) { // Updated for state array
+            const order = state.orders.find(o => o.id === orderId);
+            if (order) {
+                order.status = newStatus;
+                showToast(`Order #${orderId.substring(5,11)} updated to ${newStatus}.`);
+                renderAdminPanel(); // Re-render admin panel to show change
+            }
         }
         window.handleUpdateOrderStatus = handleUpdateOrderStatus;
 
-        async function handleDeleteProduct(productId) { 
+        function handleDeleteProduct(productId) { // Updated for state array
             if (confirm('Are you sure you want to delete this product?')) { 
-                await deleteDoc(doc(db, "products", productId));
+                state.products = state.products.filter(p => p.id !== productId);
                 showToast('Product deleted successfully.', 'success'); 
-                // onSnapshot will handle UI update
+                renderAdminPanel(); // Re-render relevant parts
             } 
         }
         window.handleDeleteProduct = handleDeleteProduct;
@@ -762,7 +1082,7 @@
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     document.getElementById('product-image-preview').src = e.target.result;
-                    document.getElementById('product-image').value = e.target.result;
+                    document.getElementById('product-image').value = e.target.result; // Store as Base64 Data URL
                 }
                 reader.readAsDataURL(file);
             }
@@ -776,35 +1096,46 @@
             const categorySelect = document.getElementById('product-category');
             const imagePreview = document.getElementById('product-image-preview');
             const hiddenImageInput = document.getElementById('product-image');
+             const discountTextInput = document.getElementById('product-discount-text'); // Get discount input
 
             categorySelect.innerHTML = state.categories.map(c => `<option value="${c}">${c}</option>`).join('');
             
             if (productId) {
                 const product = state.products.find(p => p.id === productId);
-                modalTitle.textContent = 'Edit Product';
-                document.getElementById('product-id').value = product.id;
-                document.getElementById('product-name').value = product.name;
-                document.getElementById('product-category').value = product.category;
-                document.getElementById('product-price').value = product.price;
-                document.getElementById('product-old-price').value = product.oldPrice;
-                hiddenImageInput.value = product.image;
-                imagePreview.src = product.image;
+                 if (product) {
+                    modalTitle.textContent = 'Edit Product';
+                    document.getElementById('product-id').value = product.id;
+                    document.getElementById('product-name').value = product.name;
+                    document.getElementById('product-category').value = product.category;
+                    document.getElementById('product-price').value = product.price;
+                    document.getElementById('product-old-price').value = product.oldPrice;
+                    hiddenImageInput.value = product.image; // Assume image is already Data URL or placeholder
+                    imagePreview.src = product.image;
+                    discountTextInput.value = product.discountText || ''; // Populate discount text
+                } else {
+                     showToast('Product not found for editing.', 'error');
+                     return; // Don't open modal if product doesn't exist
+                }
             } else {
                 modalTitle.textContent = 'Add New Product';
                 document.getElementById('product-id').value = '';
                 hiddenImageInput.value = '';
                 imagePreview.src = 'https://placehold.co/100x100/F5F5F5/CCC?text=Preview';
+                 discountTextInput.value = ''; // Clear discount text for new product
             }
             showModal('product-modal');
             lucide.createIcons();
         }
         
-        async function handleSaveProduct(event) {
+        function handleSaveProduct(event) { // Updated for state array
             event.preventDefault();
             const id = document.getElementById('product-id').value;
-            const imageUrl = document.getElementById('product-image').value;
+            const imageUrl = document.getElementById('product-image').value; // This is now a Data URL or placeholder
 
-            if (!imageUrl) { showToast('Please upload an image for the product.', 'error'); return; }
+            if (!imageUrl || imageUrl === 'https://placehold.co/100x100/F5F5F5/CCC?text=Preview') { 
+                showToast('Please upload an image for the product.', 'error'); 
+                return; 
+            }
 
             const productData = { 
                 name: document.getElementById('product-name').value, 
@@ -813,27 +1144,66 @@
                 oldPrice: parseFloat(document.getElementById('product-old-price').value) || 0, 
                 image: imageUrl, 
                 rating: 4.5, sold: 0,
-                reviews: [], questions: [] 
+                reviews: [], questions: [],
+                discountText: document.getElementById('product-discount-text').value.trim() // Get discount text
             }; 
 
             if (id) {
-                const productRef = doc(db, 'products', id);
-                await updateDoc(productRef, productData);
-                showToast('Product updated successfully!'); 
+                const index = state.products.findIndex(p => p.id === id); 
+                 if (index !== -1) {
+                    productData.reviews = state.products[index].reviews; // Keep existing reviews/questions
+                    productData.questions = state.products[index].questions;
+                    productData.sold = state.products[index].sold; // Keep existing sold count
+                    productData.rating = state.products[index].rating; // Keep existing rating
+                    state.products[index] = { ...state.products[index], ...productData }; 
+                    showToast('Product updated successfully!'); 
+                } else {
+                     showToast('Error updating product.', 'error');
+                }
             } else { 
-                await addDoc(collection(db, "products"), productData);
-                showToast('Product added successfully!'); 
+                 productData.id = `prod${Date.now()}`; // Create a simple unique ID
+                 state.products.push(productData); 
+                 showToast('Product added successfully!'); 
             } 
             hideModal('product-modal'); 
-            // onSnapshot will handle UI update
+            renderAdminPanel(); // Re-render admin product list
         }
         window.handleSaveProduct = handleSaveProduct;
 
-        async function handleSaveCategory(event) { event.preventDefault(); const newCategory = document.getElementById('new-category-name').value; if (newCategory && !state.categories.includes(newCategory)) { state.categories.push(newCategory); /* In a real app, you'd save this to Firestore */ renderAdminPanel(); showToast(`Category "${newCategory}" added.`); document.getElementById('new-category-name').value = ''; } else { showToast('Category is empty or already exists.', 'error'); } }
+        function handleSaveCategory(event) { event.preventDefault(); const newCategory = document.getElementById('new-category-name').value; if (newCategory && !state.categories.includes(newCategory)) { state.categories.push(newCategory); renderAdminPanel(); showToast(`Category "${newCategory}" added.`); document.getElementById('new-category-name').value = ''; } else { showToast('Category is empty or already exists.', 'error'); } }
         window.handleSaveCategory = handleSaveCategory;
 
+         // --- ADMIN SITE CONTENT HANDLERS ---
+         window.handleBannerUpload = (event) => {
+             const file = event.target.files[0];
+             if (file) {
+                 const reader = new FileReader();
+                 reader.onload = function(e) {
+                     state.bannerImageUrl = e.target.result;
+                     document.getElementById('banner-preview').src = e.target.result; // Update preview
+                     showToast('Banner image updated. Changes will show on next homepage load.');
+                     // Optionally re-render admin panel if needed, but not necessary just for preview
+                 }
+                 reader.readAsDataURL(file);
+             }
+         }
+
+         window.handlePageSelectChange = (selectedPageKey) => {
+             state.editingPageKey = selectedPageKey;
+             // Update the textarea content when dropdown changes
+             document.getElementById('page-content-editor').value = state.pageContent[selectedPageKey] || '';
+         }
+
+         window.handleSavePageContent = () => {
+             const currentPageKey = state.editingPageKey;
+             const newContent = document.getElementById('page-content-editor').value;
+             state.pageContent[currentPageKey] = newContent;
+             showToast('Page content saved successfully.');
+             // No need to re-render the admin panel, just update state
+         }
+
         // --- PRODUCT PAGE INTERACTION HANDLERS ---
-        async function handlePostReview(event, productId) {
+        function handlePostReview(event, productId) { // Updated for state array
             event.preventDefault();
             const rating = event.target.rating.value;
             const text = event.target['review-text'].value;
@@ -847,19 +1217,18 @@
                 date: new Date()
             };
 
-            const productRef = doc(db, 'products', productId);
-            const productSnap = await getDoc(productRef);
-            const existingReviews = productSnap.data().reviews || [];
-
-            await updateDoc(productRef, {
-                reviews: [newReview, ...existingReviews]
-            });
-            renderProductDetailsPage(); // Re-render to show new review
-            showToast('Thank you for your review!');
+            const product = state.products.find(p => p.id === productId);
+            if (product) {
+                 product.reviews = [newReview, ...(product.reviews || [])];
+                 renderProductDetailsPage(); // Re-render to show new review
+                 showToast('Thank you for your review!');
+            } else {
+                 showToast('Error finding product to add review.', 'error');
+            }
         }
         window.handlePostReview = handlePostReview;
 
-        async function handlePostQuestion(event, productId) {
+        function handlePostQuestion(event, productId) { // Updated for state array
             event.preventDefault();
             const questionText = event.target['question-text'].value;
             const newQuestion = {
@@ -869,139 +1238,111 @@
                 answer: null, 
                 date: new Date()
             };
-            const productRef = doc(db, 'products', productId);
-            const productSnap = await getDoc(productRef);
-            const existingQuestions = productSnap.data().questions || [];
-
-            await updateDoc(productRef, {
-                questions: [...existingQuestions, newQuestion]
-            });
-
-            renderProductDetailsPage(); // Re-render to show new question
-            showToast('Your question has been submitted.');
+            const product = state.products.find(p => p.id === productId);
+             if (product) {
+                 product.questions = [...(product.questions || []), newQuestion];
+                 renderProductDetailsPage(); // Re-render to show new question
+                 showToast('Your question has been submitted.');
+             } else {
+                 showToast('Error finding product to add question.', 'error');
+             }
         }
         window.handlePostQuestion = handlePostQuestion;
 
         // --- USER PROFILE HANDLERS ---
-        window.setProfileTab = (tab) => { state.profileCurrentTab = tab; renderProfilePage(); }
-        async function handleUpdateProfile(event) { 
+        window.setProfileTab = (tab) => { 
+             state.profileCurrentTab = tab; 
+             renderProfilePage(); 
+        }
+
+        window.openEditProfileModal = () => {
+             document.getElementById('profile-name-edit').value = state.currentUser.displayName;
+             document.getElementById('profile-email-edit').value = state.currentUser.email;
+             document.getElementById('profile-marketing-edit').checked = state.currentUser.profile?.marketingEmails || false;
+             showModal('edit-profile-modal');
+        }
+
+         function handleUpdateProfile(event) { // Updated for state object & modal (Only updates name & marketing from modal)
             event.preventDefault(); 
-            const userRef = doc(db, "users", state.currentUser.uid);
-            await updateDoc(userRef, {
-                displayName: document.getElementById('profile-name').value,
-                "profile.phone": document.getElementById('profile-phone').value,
-                "profile.address": document.getElementById('profile-address').value
-            });
+            state.currentUser.displayName = document.getElementById('profile-name-edit').value;
+             state.currentUser.profile.marketingEmails = document.getElementById('profile-marketing-edit').checked;
             showToast('Profile updated successfully!'); 
+            hideModal('edit-profile-modal');
+            updateHeaderUI(); // Update header if name changed
+            renderProfilePage(); // Re-render profile page
         }
         window.handleUpdateProfile = handleUpdateProfile;
+        
+         // New handler for the full profile edit view
+        function handleUpdateProfileFull(event) { 
+             event.preventDefault(); 
+             state.currentUser.displayName = document.getElementById('profile-name-full').value;
+             state.currentUser.profile.phone = document.getElementById('profile-phone-full').value;
+             // Address is handled separately now
+             state.currentUser.profile.marketingEmails = document.getElementById('profile-marketing-full').checked;
+             showToast('Profile details updated successfully!'); 
+             updateHeaderUI(); // Update header if name changed
+             renderProfilePage(); // Re-render profile page
+         }
+         window.handleUpdateProfileFull = handleUpdateProfileFull; // Assign to window
+
+
+        // Handle marketing email toggle directly from Manage Account view
+        window.handleMarketingEmailToggle = (isChecked) => {
+             if (state.currentUser && state.currentUser.profile) {
+                 state.currentUser.profile.marketingEmails = isChecked;
+                 showToast('Marketing email preference updated.');
+                 // No need to re-render the whole page, just update the state
+             }
+        };
+
+        // Placeholder for adding/editing address - would open another modal
+        window.addAddress = (type) => {
+            showToast(`${type === 'shipping' ? 'Shipping' : 'Billing'} address management coming soon!`, 'info');
+            // In a full implementation, this would open a form modal
+            // to add/edit address details, similar to the edit profile modal.
+            // Example: openAddressModal(type);
+        }
 
         window.handlePasswordChange = (event) => { event.preventDefault(); showToast('Password updated successfully!'); document.getElementById('password-change-form').reset(); }
         
-        async function showOrderDetails(orderId) { 
-            const orderRef = doc(db, 'orders', orderId);
-            const orderSnap = await getDoc(orderRef);
-            const order = orderSnap.data();
+        function showOrderDetails(orderId) { // Updated for state array
+            const order = state.orders.find(o => o.id === orderId);
 
             if(!order) return; 
             const detailsTitle = document.getElementById('order-details-title'); 
             const detailsContent = document.getElementById('order-details-content'); 
-            detailsTitle.textContent = `Details for Order #${orderId.substring(0,6)}`; 
+            detailsTitle.textContent = `Details for Order #${orderId.substring(5,11)}`; 
             const itemsHtml = order.items.map(item => `<li>${item.name} (x${item.quantity}) - ৳${(item.price * item.quantity).toFixed(2)}</li>`).join(''); 
-            detailsContent.innerHTML = `<div><p><strong>Date:</strong> ${new Date(order.date.seconds * 1000).toLocaleDateString()}</p><p><strong>Status:</strong> ${order.status}</p><p><strong>Total:</strong> ৳${order.total.toFixed(2)}</p><h4 class="font-bold mt-4">Items:</h4><ul class="list-disc pl-5">${itemsHtml}</ul></div>`; 
+            detailsContent.innerHTML = `<div><p><strong>Date:</strong> ${order.date.toLocaleDateString()}</p><p><strong>Status:</strong> ${order.status}</p><p><strong>Total:</strong> ৳${order.total.toFixed(2)}</p><h4 class="font-bold mt-4">Items:</h4><ul class="list-disc pl-5">${itemsHtml}</ul></div>`; 
             showModal('order-details-modal'); 
         }
         window.showOrderDetails = showOrderDetails;
 
-        // --- FIREBASE AUTH LISTENER ---
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                // User is signed in.
-                const userDocRef = doc(db, "users", user.uid);
-                let userDocSnap = await getDoc(userDocRef);
-
-                if (!userDocSnap.exists()) {
-                    // Create a new user document if it's a first-time Google sign-in
-                    const adminEmails = ['admin@kongshop.com', 'ifronrobiul@gmail.com'];
-                    await setDoc(userDocRef, {
-                        uid: user.uid,
-                        displayName: user.displayName,
-                        email: user.email,
-                        isAdmin: adminEmails.includes(user.email.toLowerCase()), // Admin Check
-                        profile: { phone: '', address: ''}
-                    });
-                    userDocSnap = await getDoc(userDocRef); // Re-fetch the new doc
-                }
-
-                state.isLoggedIn = true;
-                state.currentUser = { uid: user.uid, ...userDocSnap.data() };
-                state.isAdmin = state.currentUser.isAdmin || false;
-                
-                showToast(`Welcome, ${state.currentUser.displayName}!`);
-
-            } else {
-                // User is signed out.
-                state.isLoggedIn = false;
-                state.currentUser = null;
-                state.isAdmin = false;
-                showToast('You have been logged out.');
-            }
-            updateHeaderUI();
-            handleNavigation('home');
-        });
-
-
-        // --- FIREBASE DATA LISTENERS ---
-        function setupFirestoreListeners() {
-            // Unsubscribe from old listeners if they exist
-            if (state.unsubscribeProducts) state.unsubscribeProducts();
-            if (state.unsubscribeOrders) state.unsubscribeOrders();
-
-            // Listen for product changes
-            const productsQuery = query(collection(db, "products"));
-            state.unsubscribeProducts = onSnapshot(productsQuery, (querySnapshot) => {
-                state.products = [];
-                querySnapshot.forEach((doc) => {
-                    state.products.push({ id: doc.id, ...doc.data() });
-                });
-                // Re-render if on a page that displays products
-                if (['home', 'shop', 'product', 'search', 'category'].includes(state.currentPage)) {
-                    handleNavigation(state.currentPage, state.currentProduct || state.searchQuery || state.currentCategory);
-                }
-            });
-
-            // Listen for order changes (for admin)
-            const ordersQuery = query(collection(db, "orders"));
-            state.unsubscribeOrders = onSnapshot(ordersQuery, (querySnapshot) => {
-                 state.orders = [];
-                 let income = 0, pending = 0, completed = 0, canceled = 0;
-                 querySnapshot.forEach((doc) => {
-                    const order = { id: doc.id, ...doc.data() };
-                    state.orders.push(order);
-                    // Calculate dashboard stats
-                    if (order.status === 'Completed') income += order.total;
-                    if (order.status === 'Pending') pending++;
-                    if (order.status === 'Completed') completed++;
-                    if (order.status === 'Canceled') canceled++;
-                });
-                state.dashboardStats = { income, pending, completed, canceled };
-                // Re-render if admin is viewing orders or dashboard
-                if (state.isAdmin && (state.adminCurrentTab === 'orders' || state.adminCurrentTab === 'dashboard')) {
-                    renderAdminPanel();
-                }
-            });
-        }
-
+        // --- REMOVED FIREBASE AUTH LISTENER ---
+        
+        // --- REMOVED FIREBASE DATA LISTENERS ---
 
         // --- INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', () => {
-            setupFirestoreListeners();
+            state.products = mockProducts; // Initialize with mock data
+            state.orders = mockOrders;     // Initialize with mock data
+            calculateDashboardStats();      // Calculate initial stats
+            
             handleNavigation('home');
             updateHeaderUI();
             lucide.createIcons();
             document.getElementById('footer-year').textContent = new Date().getFullYear();
+            
             // Assign handlers to window for inline HTML onclicks
             window.handleNavigation = handleNavigation;
+            // Ensure other handlers are assigned to window
+            window.handleSearch = handleSearch;
+            window.handleAddToCart = handleAddToCart;
+            window.handleBuyNow = handleBuyNow;
+            window.handleRemoveFromCart = handleRemoveFromCart;
+            window.handleQuantityChange = handleQuantityChange;
+            window.handlePlaceOrder = handlePlaceOrder;
         });
 
     </script>
