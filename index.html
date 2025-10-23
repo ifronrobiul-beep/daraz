@@ -163,8 +163,8 @@
                     <ul class="space-y-2 text-sm text-gray-300">
                         <li><a href="#" onclick="handleNavigation('about')" class="hover:text-white">About Us</a></li>
                         <li><a href="#" class="hover:text-white">Careers</a></li>
-                        <li><a href="#" class="hover:text-white">KongShop Blog</a></li>
-                        <li><a href="#" class="hover:text-white">Terms & Conditions</a></li>
+                        <li><a href="#" onclick="handleNavigation('home')" class="hover:text-white">KongShop Blog</a></li> {/* Corrected link */}
+                        <li><a href="#" onclick="handleNavigation('home')" class="hover:text-white">Terms & Conditions</a></li> {/* Corrected link */}
                     </ul>
                 </div>
                 <div class="col-span-1 md:col-span-2">
@@ -268,9 +268,10 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div><label for="product-name" class="block text-sm font-medium text-gray-700">Product Name</label><input type="text" id="product-name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" required></div>
                     <div><label for="product-category" class="block text-sm font-medium text-gray-700">Category</label><select id="product-category" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" required></select></div>
-                    <div><label for="product-price" class="block text-sm font-medium text-gray-700">Price (৳)</label><input type="number" id="product-price" step="0.01" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" required></div>
-                    <div><label for="product-old-price" class="block text-sm font-medium text-gray-700">Old Price (৳)</label><input type="number" id="product-old-price" step="0.01" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"></div>
-                     <div><label for="product-discount-text" class="block text-sm font-medium text-gray-700">Discount Text (Optional)</label><input type="text" id="product-discount-text" placeholder="e.g., 30% OFF, Special" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"></div>
+                    <div><label for="product-price" class="block text-sm font-medium text-gray-700">Current Price (৳)</label><input type="number" id="product-price" step="0.01" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" required></div>
+                    <div><label for="product-discount-percent" class="block text-sm font-medium text-gray-700">Discount Percentage (%)</label><input type="number" id="product-discount-percent" step="0.1" min="0" max="100" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"></div>
+                     <div><label for="product-quantity" class="block text-sm font-medium text-gray-700">Quantity (Stock)</label><input type="number" id="product-quantity" min="0" step="1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" required></div>
+                     <div><label for="product-discount-text" class="block text-sm font-medium text-gray-700">Custom Discount Text (Overrides %)</label><input type="text" id="product-discount-text" placeholder="e.g., Sale, Special Offer" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500"></div>
                      <!-- Span makes image upload take full width -->
                     <div class="md:col-span-2"> 
                         <label for="product-image-upload" class="block text-sm font-medium text-gray-700">Product Image</label>
@@ -355,25 +356,24 @@
             editingPageKey: 'about', // Track which page is being edited in admin
         };
         
-        // --- MOCK DATA (Restored) ---
+        // --- MOCK DATA (Restored & Updated) ---
         const mockProducts = [
-             { id: 'prod1', name: 'Premium Wireless Earbuds', price: 2499, oldPrice: 3500, rating: 4.8, sold: 120, image: 'https://placehold.co/400x400/F97316/FFFFFF?text=Earbuds', category: 'Electronics', discountText: '', reviews: [{user: 'Mehedi H.', rating: 5, text: 'Amazing sound quality and battery life!', date: new Date('2025-10-20')}, {user: 'Saima A.', rating: 4, text: 'Good product, connects easily.', date: new Date('2025-10-18')}], questions: [{user: 'Fahim', question: 'Is this compatible with iPhone?', answer: 'Yes, it works perfectly with all Bluetooth-enabled devices, including iPhones.', date: new Date('2025-10-19')}] },
-            { id: 'prod2', name: 'Smart Watch with Fitness Tracker', price: 3999, oldPrice: 5000, rating: 4.5, sold: 88, image: 'https://placehold.co/400x400/3B82F6/FFFFFF?text=Watch', category: 'Electronics', discountText: '20% OFF', reviews: [], questions: [] }, // Example with custom text
-            { id: 'prod3', name: 'Gaming Mouse with RGB', price: 1500, oldPrice: 2200, rating: 4.7, sold: 150, image: 'https://placehold.co/400x400/EF4444/FFFFFF?text=Mouse', category: 'Electronics', discountText: '', reviews: [{user: 'GamerGuy', rating: 5, text: 'Best mouse for the price!', date: new Date('2025-09-15')}], questions: [{user: 'Newbie', question: 'Can I change the RGB colors?', answer: 'Yes, it comes with software to customize the lighting effects.', date: new Date('2025-09-12')}] },
-            // ... (rest of the mock products - add discountText: '' if needed)
-            { id: 'prod4', name: '4K Action Camera', price: 8500, oldPrice: 11000, rating: 4.6, sold: 45, image: 'https://placehold.co/400x400/22C55E/FFFFFF?text=Camera', category: 'Electronics', discountText: '', reviews: [], questions: [] },
-            { id: 'prod5', name: 'Portable Bluetooth Speaker', price: 2200, oldPrice: 3000, rating: 4.9, sold: 200, image: 'https://placehold.co/400x400/8B5CF6/FFFFFF?text=Speaker', category: 'Electronics', discountText: '', reviews: [], questions: [] },
-            { id: 'prod6', name: 'Men\'s Casual Cotton Shirt', price: 850, oldPrice: 1200, rating: 4.2, sold: 250, image: 'https://placehold.co/400x400/10B981/FFFFFF?text=Shirt', category: 'Fashion', discountText: '', reviews: [{user: 'Rina', rating: 5, text: 'Fabric is very comfortable.', date: new Date('2025-10-05')}], questions: [{user: 'Kamal', question: 'What is the return policy?', answer: 'We have a 7-day return policy for this item.', date: new Date('2025-10-06')}] },
-            { id: 'prod7', name: 'Women\'s Stylish Handbag', price: 1800, oldPrice: 2500, rating: 4.6, sold: 95, image: 'https://placehold.co/400x400/EC4899/FFFFFF?text=Handbag', category: 'Fashion', discountText: '', reviews: [], questions: [] },
-            { id: 'prod8', name: 'Leather Wallet for Men', price: 600, oldPrice: 900, rating: 4.4, sold: 400, image: 'https://placehold.co/400x400/F59E0B/FFFFFF?text=Wallet', category: 'Fashion', discountText: '', reviews: [], questions: [] },
-            { id: 'prod9', name: 'Classic Aviator Sunglasses', price: 1200, oldPrice: 1800, rating: 4.7, sold: 180, image: 'https://placehold.co/400x400/06B6D4/FFFFFF?text=Sunglasses', category: 'Fashion', discountText: 'Sale', reviews: [], questions: [] }, // Example custom text
-            { id: 'prod10', name: 'Running Shoes for Men', price: 3200, oldPrice: 4500, rating: 4.5, sold: 130, image: 'https://placehold.co/400x400/6366F1/FFFFFF?text=Shoes', category: 'Fashion', discountText: '', reviews: [], questions: [] },
-            { id: 'prod11', name: 'Non-Stick Cookware Set (12 pcs)', price: 4500, oldPrice: 6000, rating: 4.9, sold: 50, image: 'https://placehold.co/400x400/6366F1/FFFFFF?text=Cookware', category: 'Home & Kitchen', discountText: '', reviews: [], questions: [] },
-            { id: 'prod12', name: 'Professional Blender 1500W', price: 5500, oldPrice: 7000, rating: 4.8, sold: 70, image: 'https://placehold.co/400x400/8B5CF6/FFFFFF?text=Blender', category: 'Home & Kitchen', discountText: '', reviews: [], questions: [] },
-            { id: 'prod13', name: 'Espresso Coffee Machine', price: 12500, oldPrice: 16000, rating: 4.9, sold: 30, image: 'https://placehold.co/400x400/374151/FFFFFF?text=Coffee', category: 'Home & Kitchen', discountText: '', reviews: [], questions: [] },
-            { id: 'prod14', name: 'Robotic Vacuum Cleaner', price: 18000, oldPrice: 25000, rating: 4.7, sold: 25, image: 'https://placehold.co/400x400/F472B6/FFFFFF?text=Vacuum', category: 'Home & Kitchen', discountText: '', reviews: [], questions: [] },
-            { id: 'prod15', name: 'Electric Toothbrush', price: 1800, oldPrice: 2500, rating: 4.8, sold: 90, image: 'https://placehold.co/400x400/34D399/FFFFFF?text=Toothbrush', category: 'Health & Beauty', discountText: '', reviews: [], questions: [] },
-            { id: 'prod16', name: 'Vitamin C Serum', price: 950, oldPrice: 1300, rating: 4.6, sold: 300, image: 'https://placehold.co/400x400/FBBF24/FFFFFF?text=Serum', category: 'Health & Beauty', discountText: '', reviews: [], questions: [] },
+             { id: 'prod1', name: 'Premium Wireless Earbuds', price: 2499, oldPrice: 3500, rating: 4.8, sold: 120, quantity: 50, image: 'https://placehold.co/400x400/F97316/FFFFFF?text=Earbuds', category: 'Electronics', discountText: '', reviews: [{user: 'Mehedi H.', rating: 5, text: 'Amazing sound quality and battery life!', date: new Date('2025-10-20')}, {user: 'Saima A.', rating: 4, text: 'Good product, connects easily.', date: new Date('2025-10-18')}], questions: [{user: 'Fahim', question: 'Is this compatible with iPhone?', answer: 'Yes, it works perfectly with all Bluetooth-enabled devices, including iPhones.', date: new Date('2025-10-19')}] },
+            { id: 'prod2', name: 'Smart Watch with Fitness Tracker', price: 3999, oldPrice: 5000, rating: 4.5, sold: 88, quantity: 30, image: 'https://placehold.co/400x400/3B82F6/FFFFFF?text=Watch', category: 'Electronics', discountText: '20% OFF', reviews: [], questions: [] }, 
+            { id: 'prod3', name: 'Gaming Mouse with RGB', price: 1500, oldPrice: 2200, rating: 4.7, sold: 150, quantity: 100, image: 'https://placehold.co/400x400/EF4444/FFFFFF?text=Mouse', category: 'Electronics', discountText: '', reviews: [{user: 'GamerGuy', rating: 5, text: 'Best mouse for the price!', date: new Date('2025-09-15')}], questions: [{user: 'Newbie', question: 'Can I change the RGB colors?', answer: 'Yes, it comes with software to customize the lighting effects.', date: new Date('2025-09-12')}] },
+            { id: 'prod4', name: '4K Action Camera', price: 8500, oldPrice: 11000, rating: 4.6, sold: 45, quantity: 25, image: 'https://placehold.co/400x400/22C55E/FFFFFF?text=Camera', category: 'Electronics', discountText: '', reviews: [], questions: [] },
+            { id: 'prod5', name: 'Portable Bluetooth Speaker', price: 2200, oldPrice: 3000, rating: 4.9, sold: 200, quantity: 80, image: 'https://placehold.co/400x400/8B5CF6/FFFFFF?text=Speaker', category: 'Electronics', discountText: '', reviews: [], questions: [] },
+            { id: 'prod6', name: 'Men\'s Casual Cotton Shirt', price: 850, oldPrice: 1200, rating: 4.2, sold: 250, quantity: 150, image: 'https://placehold.co/400x400/10B981/FFFFFF?text=Shirt', category: 'Fashion', discountText: '', reviews: [{user: 'Rina', rating: 5, text: 'Fabric is very comfortable.', date: new Date('2025-10-05')}], questions: [{user: 'Kamal', question: 'What is the return policy?', answer: 'We have a 7-day return policy for this item.', date: new Date('2025-10-06')}] },
+            { id: 'prod7', name: 'Women\'s Stylish Handbag', price: 1800, oldPrice: 2500, rating: 4.6, sold: 95, quantity: 60, image: 'https://placehold.co/400x400/EC4899/FFFFFF?text=Handbag', category: 'Fashion', discountText: '', reviews: [], questions: [] },
+            { id: 'prod8', name: 'Leather Wallet for Men', price: 600, oldPrice: 900, rating: 4.4, sold: 400, quantity: 200, image: 'https://placehold.co/400x400/F59E0B/FFFFFF?text=Wallet', category: 'Fashion', discountText: '', reviews: [], questions: [] },
+            { id: 'prod9', name: 'Classic Aviator Sunglasses', price: 1200, oldPrice: 1800, rating: 4.7, sold: 180, quantity: 75, image: 'https://placehold.co/400x400/06B6D4/FFFFFF?text=Sunglasses', category: 'Fashion', discountText: 'Sale', reviews: [], questions: [] }, 
+            { id: 'prod10', name: 'Running Shoes for Men', price: 3200, oldPrice: 4500, rating: 4.5, sold: 130, quantity: 40, image: 'https://placehold.co/400x400/6366F1/FFFFFF?text=Shoes', category: 'Fashion', discountText: '', reviews: [], questions: [] },
+            { id: 'prod11', name: 'Non-Stick Cookware Set (12 pcs)', price: 4500, oldPrice: 6000, rating: 4.9, sold: 50, quantity: 20, image: 'https://placehold.co/400x400/6366F1/FFFFFF?text=Cookware', category: 'Home & Kitchen', discountText: '', reviews: [], questions: [] },
+            { id: 'prod12', name: 'Professional Blender 1500W', price: 5500, oldPrice: 7000, rating: 4.8, sold: 70, quantity: 35, image: 'https://placehold.co/400x400/8B5CF6/FFFFFF?text=Blender', category: 'Home & Kitchen', discountText: '', reviews: [], questions: [] },
+            { id: 'prod13', name: 'Espresso Coffee Machine', price: 12500, oldPrice: 16000, rating: 4.9, sold: 30, quantity: 15, image: 'https://placehold.co/400x400/374151/FFFFFF?text=Coffee', category: 'Home & Kitchen', discountText: '', reviews: [], questions: [] },
+            { id: 'prod14', name: 'Robotic Vacuum Cleaner', price: 18000, oldPrice: 25000, rating: 4.7, sold: 25, quantity: 10, image: 'https://placehold.co/400x400/F472B6/FFFFFF?text=Vacuum', category: 'Home & Kitchen', discountText: '', reviews: [], questions: [] },
+            { id: 'prod15', name: 'Electric Toothbrush', price: 1800, oldPrice: 2500, rating: 4.8, sold: 90, quantity: 90, image: 'https://placehold.co/400x400/34D399/FFFFFF?text=Toothbrush', category: 'Health & Beauty', discountText: '', reviews: [], questions: [] },
+            { id: 'prod16', name: 'Vitamin C Serum', price: 950, oldPrice: 1300, rating: 4.6, sold: 300, quantity: 120, image: 'https://placehold.co/400x400/FBBF24/FFFFFF?text=Serum', category: 'Health & Beauty', discountText: '', reviews: [], questions: [] },
         ];
          const mockOrders = [
             { id: 'order101', userId: 'mock_johndoe@example.com', customerName: 'johndoe', total: 3349, status: 'Pending', date: new Date('2025-10-21'), items: [{name: 'Premium Wireless Earbuds', quantity: 1, price: 2499}, {name: 'Men\'s Casual Cotton Shirt', quantity: 1, price: 850}] },
@@ -437,7 +437,9 @@
                     discountBadge = `<div class="absolute top-2 left-2 bg-orange-500 text-white text-xs px-2 py-1 rounded">${product.discountText}</div>`;
                 } else if (product.oldPrice && product.oldPrice > product.price) {
                      const discountPercentage = Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100);
-                     discountBadge = `<div class="absolute top-2 left-2 bg-orange-500 text-white text-xs px-2 py-1 rounded">${discountPercentage}% OFF</div>`;
+                      if (discountPercentage > 0) { // Only show if there's a discount
+                         discountBadge = `<div class="absolute top-2 left-2 bg-orange-500 text-white text-xs px-2 py-1 rounded">${discountPercentage}% OFF</div>`;
+                     }
                 }
 
                 return `<div class="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-xl transition-shadow duration-300 group" onclick="window.handleNavigation('product', '${product.id}')">
@@ -449,7 +451,7 @@
                                 <h3 class="text-sm font-medium text-gray-800 truncate group-hover:text-orange-600">${product.name}</h3>
                                 <div class="mt-2">
                                     <span class="text-lg font-bold text-orange-500">৳${product.price}</span>
-                                    ${product.oldPrice && product.oldPrice > product.price ? `<span class="text-xs text-gray-500 line-through ml-2">৳${product.oldPrice}</span>` : ''}
+                                    ${product.oldPrice && product.oldPrice > product.price ? `<span class="text-xs text-gray-500 line-through ml-2">৳${product.oldPrice.toFixed(0)}</span>` : ''}
                                 </div>
                                 <div class="flex items-center mt-2 text-xs text-gray-500">
                                     <div class="flex text-yellow-400">${'<i data-lucide="star" class="w-3 h-3 fill-current"></i>'.repeat(Math.floor(product.rating))}${(product.rating % 1 !== 0 ? '<i data-lucide="star-half" class="w-3 h-3 fill-current"></i>' : '')}</div>
@@ -476,6 +478,17 @@
             const product = state.products.find(p => p.id === productId);
 
             if (!product) { mainContent.innerHTML = `<p>Product not found.</p>`; return; } 
+
+             // Display Stock Info
+             let stockInfo = '';
+             if (product.quantity > 10) {
+                 stockInfo = `<span class="text-green-600 font-medium">In Stock</span>`;
+             } else if (product.quantity > 0) {
+                 stockInfo = `<span class="text-orange-600 font-medium">Only ${product.quantity} left!</span>`;
+             } else {
+                 stockInfo = `<span class="text-red-600 font-medium">Out of Stock</span>`;
+             }
+
 
             // Reviews Section
             const reviewsHtml = product.reviews && product.reviews.length > 0 ? product.reviews.map(review => `
@@ -531,10 +544,26 @@
                         <div><img src="${product.image}" alt="${product.name}" class="w-full rounded-lg shadow-md" onerror="this.onerror=null;this.src='https://placehold.co/400x400/ccc/000?text=Image+Error';"></div>
                         <div>
                             <h1 class="text-3xl font-bold text-gray-800">${product.name}</h1>
-                            <div class="flex items-center mt-2 text-sm text-gray-500"><div class="flex text-yellow-400">${'<i data-lucide="star" class="w-4 h-4 fill-current"></i>'.repeat(Math.floor(product.rating))}</div><span class="ml-2 text-blue-500 hover:underline cursor-pointer">${product.rating} Ratings</span><span class="mx-2">|</span><span class="text-blue-500 hover:underline cursor-pointer">${product.sold}+ Sold</span></div>
-                            <div class="my-4"><span class="text-4xl font-bold text-orange-500">৳${product.price}</span><span class="text-lg text-gray-400 line-through ml-3">৳${product.oldPrice}</span></div>
+                            <div class="flex items-center mt-2 text-sm text-gray-500">
+                                <div class="flex text-yellow-400">${'<i data-lucide="star" class="w-4 h-4 fill-current"></i>'.repeat(Math.floor(product.rating))}</div>
+                                <span class="ml-2 text-blue-500 hover:underline cursor-pointer">${product.rating} Ratings</span>
+                                <span class="mx-2">|</span>
+                                <span class="text-blue-500 hover:underline cursor-pointer">${product.sold}+ Sold</span>
+                                <span class="mx-2">|</span>
+                                ${stockInfo} 
+                            </div>
+                            <div class="my-4">
+                                <span class="text-4xl font-bold text-orange-500">৳${product.price}</span>
+                                ${product.oldPrice && product.oldPrice > product.price ? `<span class="text-lg text-gray-400 line-through ml-3">৳${product.oldPrice.toFixed(0)}</span>` : ''}
+                            </div>
                             <p class="text-gray-600 mb-6">This is a high-quality ${product.name.toLowerCase()} from the ${product.category} category. It's designed for durability and performance. Perfect for your daily needs. Limited stock available!</p>
-                            <div class="flex items-center space-x-4"><button onclick="window.handleAddToCart('${product.id}')" class="flex-grow bg-orange-500 text-white py-3 px-6 rounded-lg font-semibold hover:bg-orange-600 transition-colors flex items-center justify-center space-x-2"><i data-lucide="shopping-cart" class="w-5 h-5"></i><span>Add to Cart</span></button><button onclick="window.handleBuyNow('${product.id}')" class="flex-grow bg-blue-500 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-600 transition-colors">Buy Now</button></div>
+                            <div class="flex items-center space-x-4">
+                                <button onclick="window.handleAddToCart('${product.id}')" ${product.quantity === 0 ? 'disabled' : ''} class="flex-grow bg-orange-500 text-white py-3 px-6 rounded-lg font-semibold hover:bg-orange-600 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <i data-lucide="shopping-cart" class="w-5 h-5"></i><span>Add to Cart</span>
+                                </button>
+                                <button onclick="window.handleBuyNow('${product.id}')" ${product.quantity === 0 ? 'disabled' : ''} class="flex-grow bg-blue-500 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Buy Now</button>
+                            </div>
+                             ${product.quantity === 0 ? '<p class="text-red-600 text-sm mt-2">Currently out of stock.</p>' : ''}
                         </div>
                     </div>
                 </div>
@@ -637,7 +666,7 @@
             `;
         }
         function renderAdminOrders() { if (state.orders.length === 0) return '<p>No orders found.</p>'; const ordersHtml = state.orders.map(order => `<tr class="bg-white hover:bg-gray-50"><td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#${order.id.substring(5,11)}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${order.customerName}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${order.date.toLocaleDateString()}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">৳${order.total.toFixed(2)}</td><td class="px-6 py-4 whitespace-nowrap text-sm"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${order.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' : order.status === 'Shipped' ? 'bg-blue-100 text-blue-800' : order.status === 'Completed' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${order.status}</span></td><td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">${order.status === 'Pending' ? `<button onclick="window.handleUpdateOrderStatus('${order.id}', 'Shipped')" class="text-indigo-600 hover:text-indigo-900">Ship</button>` : order.status === 'Shipped' ? `<button onclick="window.handleUpdateOrderStatus('${order.id}', 'Completed')" class="text-green-600 hover:text-green-900">Complete</button>` : ''} <button onclick="window.handleUpdateOrderStatus('${order.id}', 'Canceled')" class="text-red-600 hover:text-red-900 ml-2">Cancel</button></td></tr>`).join(''); return `<div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th><th scope="col" class="relative px-6 py-3"><span class="sr-only">Action</span></th></tr></thead><tbody class="bg-white divide-y divide-gray-200">${ordersHtml}</tbody></table></div>`; }
-        function renderAdminProducts() { const productsHtml = state.products.map(p => `<tr class="hover:bg-gray-50"><td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${p.name}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${p.category}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">৳${p.price}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${p.sold}</td><td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-4"><button onclick="window.openProductForm('${p.id}')" class="text-indigo-600 hover:text-indigo-900">Edit</button><button onclick="window.handleDeleteProduct('${p.id}')" class="text-red-600 hover:text-red-900">Delete</button></td></tr>`).join(''); return `<div class="flex justify-end mb-4"><button onclick="window.openProductForm()" class="bg-orange-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-orange-600 flex items-center space-x-2"><i data-lucide="plus-circle" class="w-5 h-5"></i><span>Add Product</span></button></div><div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sold</th><th scope="col" class="relative px-6 py-3"><span class="sr-only">Actions</span></th></tr></thead><tbody class="bg-white divide-y divide-gray-200">${productsHtml}</tbody></table></div>`; }
+        function renderAdminProducts() { const productsHtml = state.products.map(p => `<tr class="hover:bg-gray-50"><td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${p.name}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${p.category}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">৳${p.price}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${p.quantity}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${p.sold}</td><td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-4"><button onclick="window.openProductForm('${p.id}')" class="text-indigo-600 hover:text-indigo-900">Edit</button><button onclick="window.handleDeleteProduct('${p.id}')" class="text-red-600 hover:text-red-900">Delete</button></td></tr>`).join(''); return `<div class="flex justify-end mb-4"><button onclick="window.openProductForm()" class="bg-orange-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-orange-600 flex items-center space-x-2"><i data-lucide="plus-circle" class="w-5 h-5"></i><span>Add Product</span></button></div><div class="overflow-x-auto"><table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th><th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sold</th><th scope="col" class="relative px-6 py-3"><span class="sr-only">Actions</span></th></tr></thead><tbody class="bg-white divide-y divide-gray-200">${productsHtml}</tbody></table></div>`; } // Added Stock column
         function renderAdminCategories() { const categoriesHtml = state.categories.map(c => `<span class="bg-gray-100 text-gray-800 text-sm font-medium mr-2 mb-2 inline-block px-2.5 py-0.5 rounded">${c}</span>`).join(''); return `<div><h3 class="text-lg font-medium leading-6 text-gray-900">Existing Categories</h3><div class="mt-4 flex flex-wrap">${categoriesHtml}</div></div><div class="mt-8 border-t pt-6"><h3 class="text-lg font-medium leading-6 text-gray-900">Add New Category</h3><form onsubmit="window.handleSaveCategory(event)" class="mt-4 flex items-center space-x-3"><input type="text" id="new-category-name" class="block w-full max-w-xs rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" placeholder="New category name" required><button type="submit" class="bg-orange-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-orange-600">Add</button></form></div>`; }
         
          function renderAdminSiteContent() {
@@ -871,18 +900,63 @@
         function showToast(message, type = 'success') { toastElement.textContent = message; toastElement.className = `fixed bottom-5 right-5 text-white py-2 px-4 rounded-lg shadow-lg transform transition-transform duration-300 z-50 ${type === 'success' ? 'bg-green-500' : 'bg-red-500'}`; toastElement.classList.remove('translate-x-[120%]'); setTimeout(() => { toastElement.classList.add('translate-x-[120%]'); }, 3000); }
         function handleAddToCart(productId) { 
             const product = state.products.find(p => p.id === productId); 
+            if (product.quantity <= 0) {
+                 showToast('Sorry, this item is out of stock.', 'error');
+                 return;
+            }
             const existingItem = state.cart.find(item => item.id === productId); 
             if (existingItem) { 
-                existingItem.quantity++; 
+                if (existingItem.quantity < product.quantity) {
+                     existingItem.quantity++; 
+                     updateCartCount(); 
+                     showToast('Item quantity updated in cart!'); 
+                } else {
+                     showToast('Cannot add more, item limit reached.', 'error');
+                }
             } else { 
                 state.cart.push({ ...product, quantity: 1 }); 
+                 updateCartCount(); 
+                 showToast('Item added to cart!'); 
             } 
-            updateCartCount(); 
-            showToast('Item added to cart!'); 
         }
-        function handleBuyNow(productId) { if (!state.isLoggedIn) { showToast('Please log in to buy.', 'error'); showModal('login-modal'); return; } const product = state.products.find(p => p.id === productId); state.cart = [{ ...product, quantity: 1 }]; updateCartCount(); handleNavigation('checkout'); }
+        function handleBuyNow(productId) { 
+             const product = state.products.find(p => p.id === productId); 
+            if (!state.isLoggedIn) { 
+                showToast('Please log in to buy.', 'error'); 
+                showModal('login-modal'); 
+                return; 
+            } 
+             if (product.quantity <= 0) {
+                 showToast('Sorry, this item is out of stock.', 'error');
+                 return;
+             }
+            state.cart = [{ ...product, quantity: 1 }]; 
+            updateCartCount(); 
+            handleNavigation('checkout'); 
+        }
         function handleRemoveFromCart(productId) { state.cart = state.cart.filter(item => item.id !== productId); updateCartCount(); renderCartPage(); }
-        function handleQuantityChange(productId, newQuantity) { if (newQuantity < 1) { handleRemoveFromCart(productId); return; } const cartItem = state.cart.find(item => item.id === productId); if(cartItem) { cartItem.quantity = newQuantity; updateCartCount(); renderCartPage(); } }
+        function handleQuantityChange(productId, newQuantity) { 
+            const product = state.products.find(p => p.id === productId); // Find the original product for stock check
+            const cartItem = state.cart.find(item => item.id === productId); 
+            
+            if (newQuantity < 1) { 
+                handleRemoveFromCart(productId); 
+                return; 
+            } 
+            if (newQuantity > product.quantity) {
+                 showToast(`Only ${product.quantity} items available in stock.`, 'error');
+                 // Optionally reset cart quantity to max available, or leave as is
+                 // cartItem.quantity = product.quantity; 
+                 // updateCartCount(); 
+                 // renderCartPage();
+                 return; 
+            }
+            if(cartItem) { 
+                cartItem.quantity = newQuantity; 
+                updateCartCount(); 
+                renderCartPage(); 
+            } 
+        }
         function handleSearch(force = false) { const query = searchInput.value.toLowerCase(); if (force || query) { handleNavigation('search', query); } else if (!query) { handleNavigation('home'); } }
         
         async function notifyDiscord(newOrder) {
@@ -922,6 +996,23 @@
                 showModal('login-modal');
                 return;
             }
+
+            // Check stock before placing order
+            let insufficientStock = false;
+            state.cart.forEach(cartItem => {
+                const productInStock = state.products.find(p => p.id === cartItem.id);
+                if (!productInStock || cartItem.quantity > productInStock.quantity) {
+                    showToast(`Insufficient stock for ${cartItem.name}. Only ${productInStock ? productInStock.quantity : 0} available.`, 'error');
+                    insufficientStock = true;
+                }
+            });
+
+            if (insufficientStock) {
+                renderCartPage(); // Re-render cart to show potential issues or just prevent order
+                return; 
+            }
+
+            // If stock is sufficient, proceed
             const newOrderId = `order${Date.now()}`; // Simple unique ID
             const orderData = {
                 id: newOrderId,
@@ -932,6 +1023,15 @@
                 date: new Date(),
                 items: state.cart.map(i => ({ ...i })) // Create copies of cart items
             };
+            
+            // Decrease stock quantity
+            orderData.items.forEach(orderedItem => {
+                 const productIndex = state.products.findIndex(p => p.id === orderedItem.id);
+                 if (productIndex !== -1) {
+                     state.products[productIndex].quantity -= orderedItem.quantity;
+                     // In a real DB, you'd update the product quantity here
+                 }
+            });
             
             state.orders.push(orderData); // Add to local state
             notifyDiscord(orderData); // Still notify Discord (async but we don't wait)
@@ -1096,7 +1196,10 @@
             const categorySelect = document.getElementById('product-category');
             const imagePreview = document.getElementById('product-image-preview');
             const hiddenImageInput = document.getElementById('product-image');
-             const discountTextInput = document.getElementById('product-discount-text'); // Get discount input
+            const discountPercentInput = document.getElementById('product-discount-percent');
+             const discountTextInput = document.getElementById('product-discount-text'); // Get discount text input
+             const quantityInput = document.getElementById('product-quantity'); // Get quantity input
+
 
             categorySelect.innerHTML = state.categories.map(c => `<option value="${c}">${c}</option>`).join('');
             
@@ -1108,20 +1211,28 @@
                     document.getElementById('product-name').value = product.name;
                     document.getElementById('product-category').value = product.category;
                     document.getElementById('product-price').value = product.price;
-                    document.getElementById('product-old-price').value = product.oldPrice;
-                    hiddenImageInput.value = product.image; // Assume image is already Data URL or placeholder
+                     // Calculate percentage if oldPrice exists and discountText is empty
+                     if (product.oldPrice && product.oldPrice > product.price && !product.discountText) {
+                         discountPercentInput.value = (((product.oldPrice - product.price) / product.oldPrice) * 100).toFixed(1);
+                     } else {
+                         discountPercentInput.value = ''; // Clear if custom text or no discount
+                     }
+                    hiddenImageInput.value = product.image; 
                     imagePreview.src = product.image;
                     discountTextInput.value = product.discountText || ''; // Populate discount text
+                     quantityInput.value = product.quantity || 0; // Populate quantity
                 } else {
                      showToast('Product not found for editing.', 'error');
-                     return; // Don't open modal if product doesn't exist
+                     return; 
                 }
             } else {
                 modalTitle.textContent = 'Add New Product';
                 document.getElementById('product-id').value = '';
+                 discountPercentInput.value = ''; // Clear discount percent
                 hiddenImageInput.value = '';
                 imagePreview.src = 'https://placehold.co/100x100/F5F5F5/CCC?text=Preview';
                  discountTextInput.value = ''; // Clear discount text for new product
+                 quantityInput.value = 0; // Default quantity for new product
             }
             showModal('product-modal');
             lucide.createIcons();
@@ -1137,13 +1248,27 @@
                 return; 
             }
 
+             const price = parseFloat(document.getElementById('product-price').value);
+             const discountPercent = parseFloat(document.getElementById('product-discount-percent').value);
+             let oldPrice = 0;
+             if (!isNaN(discountPercent) && discountPercent > 0 && discountPercent <= 100) {
+                 // Calculate oldPrice based on discount percentage
+                 oldPrice = price / (1 - (discountPercent / 100));
+             } else {
+                 // If no valid percentage, maybe keep existing oldPrice if editing, or set to 0/price
+                  oldPrice = price; // Or keep existing if id exists: state.products.find(p=>p.id === id)?.oldPrice || price;
+             }
+
+
             const productData = { 
                 name: document.getElementById('product-name').value, 
                 category: document.getElementById('product-category').value, 
-                price: parseFloat(document.getElementById('product-price').value), 
-                oldPrice: parseFloat(document.getElementById('product-old-price').value) || 0, 
+                price: price, 
+                oldPrice: oldPrice, // Use calculated or original price
+                quantity: parseInt(document.getElementById('product-quantity').value) || 0, // Get quantity
                 image: imageUrl, 
-                rating: 4.5, sold: 0,
+                rating: 4.5, // Default rating
+                sold: 0, // Default sold count for new, keep existing for edit
                 reviews: [], questions: [],
                 discountText: document.getElementById('product-discount-text').value.trim() // Get discount text
             }; 
@@ -1155,6 +1280,9 @@
                     productData.questions = state.products[index].questions;
                     productData.sold = state.products[index].sold; // Keep existing sold count
                     productData.rating = state.products[index].rating; // Keep existing rating
+                     if (isNaN(discountPercent) || discountPercent <= 0) { // If discount removed, reset oldPrice
+                         productData.oldPrice = productData.price;
+                     }
                     state.products[index] = { ...state.products[index], ...productData }; 
                     showToast('Product updated successfully!'); 
                 } else {
@@ -1167,6 +1295,9 @@
             } 
             hideModal('product-modal'); 
             renderAdminPanel(); // Re-render admin product list
+             if (state.currentPage === 'shop' || state.currentPage === 'home') { // Refresh shop/home if visible
+                 handleNavigation(state.currentPage);
+             }
         }
         window.handleSaveProduct = handleSaveProduct;
 
